@@ -11,7 +11,6 @@ export const fetchTransactions = async () => {
         return [];
     }
     return data;
-    return data;
 };
 
 export const fetchMembers = async () => {

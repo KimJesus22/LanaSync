@@ -14,8 +14,7 @@ const Dashboard = () => {
         users,
         currentUserFilter,
         setCurrentUserFilter,
-        getExpensesByCategory,
-        currentMonth
+        getExpensesByCategory
     } = useFinanzas();
 
     const [showAchievementModal, setShowAchievementModal] = useState(false);

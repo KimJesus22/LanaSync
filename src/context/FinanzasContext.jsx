@@ -145,6 +145,7 @@ export const FinanzasProvider = ({ children }) => {
             await apiAddTransaction(dbTransaction);
         } catch (error) {
             console.error("Error al agregar transacción:", error);
+            alert("Error al guardar la transacción. Verifica tu conexión a internet.");
         }
     };
 
