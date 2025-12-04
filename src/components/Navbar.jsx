@@ -1,4 +1,4 @@
-import { LayoutDashboard, ArrowRightLeft, Settings } from 'lucide-react';
+import { LayoutDashboard, ArrowRightLeft, Settings, BarChart3 } from 'lucide-react';
 import { NavLink } from 'react-router-dom';
 import { cn } from '../lib/utils';
 
@@ -13,6 +13,11 @@ const Navbar = () => {
             name: 'Movimientos',
             path: '/movimientos',
             icon: ArrowRightLeft,
+        },
+        {
+            name: 'Estadísticas',
+            path: '/estadisticas',
+            icon: BarChart3,
         },
         {
             name: 'Configuración',

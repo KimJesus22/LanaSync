@@ -24,6 +24,45 @@ export const fetchMembers = async () => {
         return [];
     }
     return data;
+    return data;
+};
+
+export const fetchRecurringExpenses = async () => {
+    const { data, error } = await supabase
+        .from('recurring_expenses')
+        .select('*')
+        .order('day_of_month', { ascending: true });
+
+    if (error) {
+        console.error('Error fetching recurring expenses:', error);
+        return [];
+    }
+    return data;
+};
+
+export const addRecurringExpense = async (expense) => {
+    const { data, error } = await supabase
+        .from('recurring_expenses')
+        .insert([expense])
+        .select();
+
+    if (error) {
+        console.error('Error adding recurring expense:', error);
+        throw error;
+    }
+    return data[0];
+};
+
+export const deleteRecurringExpense = async (id) => {
+    const { error } = await supabase
+        .from('recurring_expenses')
+        .delete()
+        .eq('id', id);
+
+    if (error) {
+        console.error('Error deleting recurring expense:', error);
+        throw error;
+    }
 };
 
 export const addTransaction = async (transaction) => {

@@ -4,7 +4,14 @@ import { exportToCSV } from '../lib/utils';
 import { Card } from '../components/ui/Card';
 
 const Configuracion = () => {
-    const { transactions, currentMonth, users } = useFinanzas();
+    const {
+        transactions,
+        currentMonth,
+        users,
+        recurringExpenses,
+        addRecurringExpense,
+        deleteRecurringExpense
+    } = useFinanzas();
 
     const handleDownload = () => {
         exportToCSV(transactions, currentMonth, users);
@@ -31,6 +38,63 @@ const Configuracion = () => {
                         <Download size={24} />
                     </button>
                 </Card>
+            </section>
+
+            <section className="space-y-4">
+                <h2 className="text-lg font-semibold text-white">Gastos Recurrentes</h2>
+                <p className="text-xs text-muted">La app te recordará estos pagos.</p>
+
+                <div className="space-y-3">
+                    {recurringExpenses.map(expense => (
+                        <Card key={expense.id} className="p-4 flex items-center justify-between">
+                            <div>
+                                <h3 className="font-medium text-white">{expense.name}</h3>
+                                <p className="text-xs text-muted">
+                                    ${expense.amount} • Día {expense.day_of_month} • {expense.category}
+                                </p>
+                            </div>
+                            <button
+                                onClick={() => deleteRecurringExpense(expense.id)}
+                                className="text-red-400 hover:text-red-300 p-2"
+                            >
+                                ✕
+                            </button>
+                        </Card>
+                    ))}
+                </div>
+
+                <form
+                    onSubmit={(e) => {
+                        e.preventDefault();
+                        const formData = new FormData(e.target);
+                        addRecurringExpense({
+                            name: formData.get('name'),
+                            amount: parseFloat(formData.get('amount')),
+                            day_of_month: parseInt(formData.get('day')),
+                            category: formData.get('category'),
+                            user_id: users[0]?.id || 'user-1' // Default to first user for now
+                        });
+                        e.target.reset();
+                    }}
+                    className="bg-surface p-4 rounded-xl space-y-3 border border-gray-700"
+                >
+                    <h3 className="text-sm font-medium text-white">Nuevo Gasto Recurrente</h3>
+                    <div className="grid grid-cols-2 gap-3">
+                        <input name="name" placeholder="Nombre (ej: Netflix)" required className="bg-background rounded-lg p-2 text-sm text-white border border-gray-700" />
+                        <input name="amount" type="number" placeholder="Monto" required className="bg-background rounded-lg p-2 text-sm text-white border border-gray-700" />
+                        <input name="day" type="number" min="1" max="31" placeholder="Día del mes" required className="bg-background rounded-lg p-2 text-sm text-white border border-gray-700" />
+                        <select name="category" className="bg-background rounded-lg p-2 text-sm text-white border border-gray-700">
+                            <option value="Servicios">Servicios</option>
+                            <option value="Vivienda">Vivienda</option>
+                            <option value="Transporte">Transporte</option>
+                            <option value="Ocio">Ocio</option>
+                            <option value="Educación">Educación</option>
+                        </select>
+                    </div>
+                    <button type="submit" className="w-full bg-primary text-black font-bold py-2 rounded-lg text-sm">
+                        Agregar
+                    </button>
+                </form>
             </section>
 
             <div className="text-center text-xs text-muted mt-8">

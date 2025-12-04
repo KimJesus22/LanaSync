@@ -14,26 +14,75 @@ const Dashboard = () => {
         users,
         currentUserFilter,
         setCurrentUserFilter,
-        getExpensesByCategory
+        getExpensesByCategory,
+        recurringExpenses,
+        transactions,
+        addTransaction
     } = useFinanzas();
 
     const [showAchievementModal, setShowAchievementModal] = useState(false);
+    const [dueExpense, setDueExpense] = useState(null);
+
+    // Check for recurring expenses
+    useEffect(() => {
+        if (!recurringExpenses || recurringExpenses.length === 0) return;
+
+        const checkDueExpenses = () => {
+            const today = new Date();
+            const currentDay = today.getDate();
+            const currentMonth = today.getMonth();
+            const currentYear = today.getFullYear();
+
+            // Find expenses that are due (day <= today) and NOT paid this month
+            const due = recurringExpenses.find(expense => {
+                if (expense.day_of_month > currentDay) return false;
+
+                // Check if paid
+                const isPaid = transactions.some(t => {
+                    const tDate = new Date(t.date);
+                    return t.type === 'gasto' &&
+                        t.description === expense.name &&
+                        tDate.getMonth() === currentMonth &&
+                        tDate.getFullYear() === currentYear;
+                });
+
+                return !isPaid;
+            });
+
+            if (due) {
+                setDueExpense(due);
+            }
+        };
+
+        checkDueExpenses();
+    }, [recurringExpenses, transactions]);
+
+    const handlePayExpense = async () => {
+        if (!dueExpense) return;
+
+        await addTransaction({
+            amount: dueExpense.amount,
+            type: 'gasto',
+            category: dueExpense.category,
+            paymentMethod: 'efectivo', // Default to efectivo, or could ask user
+            userId: dueExpense.user_id,
+            description: dueExpense.name,
+            date: new Date().toISOString()
+        });
+
+        setDueExpense(null);
+        alert(`¡Pago de ${dueExpense.name} registrado!`);
+    };
 
     useEffect(() => {
         const checkAchievement = () => {
             const today = new Date();
-            // Check if it's the 30th of the month (or later, to be safe, but requirement says day 30)
-            // Let's check if it is the 30th day of the current month being viewed? 
-            // Or the actual current date? Usually achievements are based on real time.
-            // Requirement: "Si estamos a día 30 del mes"
-
             if (today.getDate() === 30) {
                 const ocio = getExpensesByCategory('Ocio');
-                const hormiga = getExpensesByCategory('Gastos Hormiga'); // Assuming this category exists or will exist
+                const hormiga = getExpensesByCategory('Gastos Hormiga');
                 const total = ocio + hormiga;
 
                 if (total < 500) {
-                    // Trigger confetti
                     confetti({
                         particleCount: 150,
                         spread: 70,
@@ -45,7 +94,7 @@ const Dashboard = () => {
         };
 
         checkAchievement();
-    }, [getExpensesByCategory]); // Re-run if expenses change
+    }, [getExpensesByCategory]);
 
     return (
         <div className="space-y-4 relative">
@@ -105,6 +154,42 @@ const Dashboard = () => {
                         >
                             ¡Genial!
                         </button>
+                    </div>
+                </div>
+            )}
+
+            {/* Recurring Expense Alert Modal */}
+            {dueExpense && (
+                <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[70] flex items-center justify-center p-4">
+                    <div className="bg-surface border border-primary rounded-2xl p-6 max-w-sm w-full animate-in fade-in duration-300 shadow-2xl shadow-primary/20">
+                        <div className="flex items-center gap-3 mb-4">
+                            <div className="bg-primary/20 p-3 rounded-full text-primary">
+                                📅
+                            </div>
+                            <div>
+                                <h3 className="text-lg font-bold text-white">Gasto Recurrente</h3>
+                                <p className="text-xs text-primary">¡Hoy toca pagar!</p>
+                            </div>
+                        </div>
+
+                        <p className="text-gray-300 mb-6">
+                            Hoy es día {dueExpense.day_of_month}. ¿Registrar el pago de <strong>{dueExpense.name}</strong> por <strong>${dueExpense.amount}</strong>?
+                        </p>
+
+                        <div className="flex gap-3">
+                            <button
+                                onClick={() => setDueExpense(null)}
+                                className="flex-1 bg-transparent border border-gray-600 hover:bg-gray-800 text-gray-300 font-medium py-2 rounded-lg transition-colors"
+                            >
+                                Después
+                            </button>
+                            <button
+                                onClick={handlePayExpense}
+                                className="flex-1 bg-primary hover:bg-primary/90 text-black font-bold py-2 rounded-lg transition-colors"
+                            >
+                                Sí, Pagar
+                            </button>
+                        </div>
                     </div>
                 </div>
             )}
