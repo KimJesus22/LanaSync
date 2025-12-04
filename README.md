@@ -23,6 +23,22 @@ Diseñé la arquitectura enfocándome en la escalabilidad, el rendimiento y la e
 *   **Visualización de Datos**: Recharts.
 *   **PWA**: `vite-plugin-pwa` con estrategia de caché y actualización automática.
 
+```mermaid
+ graph TD
+    User((Usuario: Jesus/Adrian/Daniel)) -->|Interactúa UI| PWA[LanaSync PWA (React + Vite)]
+    PWA -->|Lectura/Escritura| SupaDB[(Supabase PostgreSQL)]
+    SupaDB -->|Realtime Subscription| PWA
+    
+    subgraph Lógica de Negocio
+    PWA -- Calcula --> Wallet1[Saldo Efectivo]
+    PWA -- Calcula --> Wallet2[Saldo Vales]
+    PWA -- Verifica --> Gamification[Motor de Logros]
+    end
+    
+    style PWA fill:#1f2937,stroke:#10b981,color:#fff
+    style SupaDB fill:#3ecf8e,stroke:#3ecf8e,color:#fff
+```
+
 ## 💡 Engineering Highlights
 
 ### 1. El Desafío de la Doble Divisa Lógica 💱
@@ -51,7 +67,7 @@ Sigue estos pasos para correr el proyecto localmente:
 
 1.  **Clonar el repositorio**
     ```bash
-    git clone https://github.com/tu-usuario/lanasync.git
+    git clone https://github.com/KimJesus22/LanaSync.git
     cd lanasync
     ```
 
