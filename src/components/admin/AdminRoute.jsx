@@ -27,37 +27,17 @@ const AdminRoute = ({ children }) => {
                 const { data, error } = await supabase
                     .from('members')
                     .select('role')
-                    .eq('id', session.user.id) // Assuming member.id matches auth.uid, wait.
-                    // In this app, members table has its own ID. We usually link by user_id if it exists, 
-                    // OR we assume the user is linked to a member.
-                    // Looking at members_migration.sql: id is uuid pk. No user_id column shown in the snippet I saw earlier?
-                    // Wait, let me check members table definition again in my mind or previous steps.
-                    // Step 227 showed: create table members (id, name, color, avatar_url). NO user_id!
-                    // BUT OnboardingGroup.jsx uses userId={session.user.id}. 
-                    // Let's check OnboardingGroup or Context to see how members are linked.
-                    // Actually, let's check FinanzasContext.
-
-                    // If I can't easily link auth.uid to member, I might have a problem.
-                    // However, usually RLS uses auth.uid().
-                    // Let's assume for now we query by `user_id` if it exists, or we need to add it.
-                    // The previous migration didn't show user_id. 
-                    // Let's check FinanzasContext.jsx to be sure.
-
-                    // PIVOT: I will check FinanzasContext.jsx first in the next step before finishing this file.
-                    // But I can't stop mid-tool.
-                    // I'll write a safe version that tries to find the member.
-
-                    // Actually, I'll write a placeholder here and fix it after checking context.
-                    // Better: I'll use a "safe" check.
-
                     .eq('user_id', session.user.id)
                     .single();
 
-                if (error) throw error;
-                setIsAdmin(data?.role === 'admin');
+                if (error) {
+                    console.warn('AdminRoute: Error checking role', error);
+                    setIsAdmin(false);
+                } else {
+                    setIsAdmin(data?.role === 'admin');
+                }
             } catch (err) {
-                console.error('Error checking admin role:', err);
-                setRoleError(err);
+                console.error('AdminRoute: Unexpected error:', err);
                 setIsAdmin(false);
             } finally {
                 setCheckingRole(false);
