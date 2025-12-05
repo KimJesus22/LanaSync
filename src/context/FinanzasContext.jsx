@@ -365,7 +365,8 @@ export const FinanzasProvider = ({ children }) => {
         syncNotification,
         userGroup,
         setUserGroup,
-        loadingGroup
+        loadingGroup,
+        subscriptionStatus: users.find(u => u.user_id === session?.user?.id)?.subscription_status || 'FREE'
     };
 
     return (

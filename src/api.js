@@ -53,6 +53,17 @@ export const fetchUserGroup = async (userId) => {
     return data?.groups;
 };
 
+export const fetchUserProfile = async (userId) => {
+    const { data, error } = await supabase
+        .from('members')
+        .select('*')
+        .eq('user_id', userId)
+        .single();
+
+    if (error) return null;
+    return data;
+};
+
 export const fetchTransactions = async () => {
     const { data, error } = await supabase
         .from('transactions')

@@ -7,6 +7,7 @@ import { useFinanzas } from './context/FinanzasContext';
 import { Navigate } from 'react-router-dom';
 import OnboardingGroup from './components/OnboardingGroup';
 import LoadingSpinner from './components/LoadingSpinner';
+import Pricing from './pages/Pricing';
 
 // Lazy Load Pages
 const Dashboard = React.lazy(() => import('./pages/Dashboard'));
@@ -59,6 +60,7 @@ function AppRoutes() {
             <Configuracion />
           </Suspense>
         } />
+        <Route path="pricing" element={<Pricing />} />
       </Route>
     </Routes>
   );

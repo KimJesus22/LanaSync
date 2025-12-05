@@ -1,6 +1,7 @@
 import { useFinanzas } from '../context/FinanzasContext';
 import { exportToCSV } from '../lib/utils';
-import { Download, FileText } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Download, FileText, Users, Plus } from 'lucide-react';
 import { Card } from '../components/ui/Card';
 import { supabase } from '../supabaseClient';
 import { PDFDownloadLink } from '@react-pdf/renderer';
@@ -14,8 +15,10 @@ const Configuracion = () => {
         recurringExpenses,
         addRecurringExpense,
         deleteRecurringExpense,
-
+        userGroup,
+        subscriptionStatus
     } = useFinanzas();
+    const navigate = useNavigate();
 
     // Calculate totals for the report
     const totalIncome = transactions
@@ -36,6 +39,34 @@ const Configuracion = () => {
                 <h1 className="text-2xl font-bold text-white">Configuración</h1>
                 <p className="text-xs text-muted">Ajustes y herramientas</p>
             </header>
+
+            <section className="space-y-4">
+                <h2 className="text-lg font-semibold text-white">Gestión de Grupos</h2>
+                <Card className="p-4 flex items-center justify-between bg-surface border-none shadow-lg">
+                    <div>
+                        <h3 className="font-medium text-white flex items-center gap-2">
+                            <Users className="w-4 h-4 text-primary" />
+                            {userGroup?.name || 'Sin Grupo'}
+                        </h3>
+                        <p className="text-xs text-muted">
+                            Plan: <span className={subscriptionStatus === 'PREMIUM' ? 'text-accent font-bold' : 'text-gray-400'}>{subscriptionStatus}</span>
+                        </p>
+                    </div>
+                    <button
+                        onClick={() => {
+                            if (subscriptionStatus !== 'PREMIUM') {
+                                navigate('/pricing');
+                            } else {
+                                alert('Funcionalidad de múltiples grupos próximamente.');
+                            }
+                        }}
+                        className="bg-gray-800 hover:bg-gray-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 border border-gray-700"
+                    >
+                        <Plus className="w-4 h-4" />
+                        Crear Grupo
+                    </button>
+                </Card>
+            </section>
 
             <section className="space-y-4">
                 <h2 className="text-lg font-semibold text-white">Datos y Portabilidad</h2>
