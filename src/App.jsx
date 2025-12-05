@@ -61,6 +61,13 @@ function AppRoutes() {
           </Suspense>
         } />
         <Route path="pricing" element={<Pricing />} />
+        <Route path="admin" element={
+          <AdminRoute>
+            <Suspense fallback={<LoadingSpinner />}>
+              <AdminDashboard />
+            </Suspense>
+          </AdminRoute>
+        } />
       </Route>
     </Routes>
   );
