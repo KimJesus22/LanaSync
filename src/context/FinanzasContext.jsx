@@ -7,7 +7,10 @@ import {
     subscribeToTransactions,
     fetchBudgets,
     addBudget as apiAddBudget,
-    deleteBudget as apiDeleteBudget
+    deleteBudget as apiDeleteBudget,
+    fetchRecurringExpenses,
+    addRecurringExpense as apiAddRecurringExpense,
+    deleteRecurringExpense as apiDeleteRecurringExpense
 } from '../api';
 import { isSameMonth, parseISO, startOfMonth } from 'date-fns';
 import { supabase } from '../supabaseClient';
@@ -26,6 +29,7 @@ export const FinanzasProvider = ({ children }) => {
     const [transactions, setTransactions] = useState([]);
     const [users, setUsers] = useState([]);
     const [budgets, setBudgets] = useState([]);
+    const [recurringExpenses, setRecurringExpenses] = useState([]);
     const [currentUserFilter, setCurrentUserFilter] = useState('all'); // 'all' | userId
     const [currentMonth, setCurrentMonth] = useState(new Date());
     const [loading, setLoading] = useState(true);
@@ -53,15 +57,17 @@ export const FinanzasProvider = ({ children }) => {
                 setTransactions([]);
                 setUsers([]);
                 setBudgets([]);
+                setRecurringExpenses([]);
                 setLoading(false);
                 return;
             }
 
             setLoading(true);
-            const [transactionsData, membersData, budgetsData] = await Promise.all([
+            const [transactionsData, membersData, budgetsData, recurringData] = await Promise.all([
                 fetchTransactions(),
                 fetchMembers(),
-                fetchBudgets()
+                fetchBudgets(),
+                fetchRecurringExpenses()
             ]);
 
             const formattedData = transactionsData.map(t => ({
@@ -78,6 +84,7 @@ export const FinanzasProvider = ({ children }) => {
             setTransactions(formattedData);
             setUsers(membersData);
             setBudgets(budgetsData);
+            setRecurringExpenses(recurringData);
             setLoading(false);
         };
 
@@ -218,6 +225,30 @@ export const FinanzasProvider = ({ children }) => {
         }
     };
 
+    // Recurring Expenses Functions
+    const addRecurringExpense = async (expense) => {
+        if (!session?.user) return;
+        try {
+            const newExpense = await apiAddRecurringExpense({
+                ...expense,
+                user_id: session.user.id
+            });
+            setRecurringExpenses(prev => [...prev, newExpense]);
+        } catch (error) {
+            console.error("Error adding recurring expense:", error);
+            alert("Error al guardar el gasto recurrente.");
+        }
+    };
+
+    const deleteRecurringExpense = async (id) => {
+        try {
+            await apiDeleteRecurringExpense(id);
+            setRecurringExpenses(prev => prev.filter(e => e.id !== id));
+        } catch (error) {
+            console.error("Error deleting recurring expense:", error);
+        }
+    };
+
     const value = {
         users,
         transactions: filteredTransactions,
@@ -234,7 +265,10 @@ export const FinanzasProvider = ({ children }) => {
         session,
         budgets,
         addBudget,
-        deleteBudget
+        deleteBudget,
+        recurringExpenses,
+        addRecurringExpense,
+        deleteRecurringExpense
     };
 
     return (

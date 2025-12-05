@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Plus, X, Wallet, CreditCard, Mic } from 'lucide-react';
 import { useFinanzas } from '../context/FinanzasContext';
+import { supabase } from '../supabaseClient';
 
 const AddTransactionModal = () => {
     const { addTransaction, users } = useFinanzas();
@@ -13,6 +14,7 @@ const AddTransactionModal = () => {
     const [category, setCategory] = useState('Comida');
     const [userId, setUserId] = useState(users[0]?.id || 'user-1'); // Default to first user
     const [isListening, setIsListening] = useState(false);
+    const [isScanning, setIsScanning] = useState(false);
 
     const expenseCategories = ['Comida', 'Transporte', 'Ocio', 'Moto', 'Universidad', 'Celular', 'Otros'];
     const incomeCategories = ['Salario', 'Regalo', 'Venta', 'Otros'];
@@ -58,7 +60,6 @@ const AddTransactionModal = () => {
         const lowerText = text.toLowerCase();
 
         // 1. Detect Amount (numbers)
-        // Matches "50", "50.50", "de 50"
         const amountMatch = lowerText.match(/(\d+(\.\d+)?)/);
         if (amountMatch) {
             setAmount(amountMatch[0]);
@@ -74,9 +75,58 @@ const AddTransactionModal = () => {
         }
         setCategory(detectedCategory);
 
-        // 3. Description is the full text (capitalized)
+        // 3. Description
         const capitalized = text.charAt(0).toUpperCase() + text.slice(1);
         setDescription(capitalized);
+    };
+
+    const compressImage = (file) => {
+        return new Promise((resolve) => {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = (event) => {
+                const img = new Image();
+                img.src = event.target.result;
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    const MAX_WIDTH = 800;
+                    const scaleSize = MAX_WIDTH / img.width;
+                    canvas.width = MAX_WIDTH;
+                    canvas.height = img.height * scaleSize;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                    resolve(canvas.toDataURL('image/jpeg', 0.7));
+                }
+            }
+        })
+    };
+
+    const handleImageUpload = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        setIsScanning(true);
+        try {
+            const compressedBase64 = await compressImage(file);
+
+            const { data, error } = await supabase.functions.invoke('scan-receipt', {
+                body: { image: compressedBase64 }
+            });
+
+            if (error) throw error;
+
+            console.log("AI Response:", data);
+
+            if (data.total) setAmount(data.total.toString());
+            if (data.category && categories.includes(data.category)) setCategory(data.category);
+            setDescription("Gasto escaneado");
+
+        } catch (error) {
+            console.error("Error scanning receipt:", error);
+            alert("Error al analizar el recibo. Intenta de nuevo.");
+        } finally {
+            setIsScanning(false);
+        }
     };
 
     const handleSubmit = async (e) => {
@@ -95,7 +145,6 @@ const AddTransactionModal = () => {
 
         await addTransaction(transaction);
 
-        // Reset and close
         setAmount('');
         setDescription('');
         setIsOpen(false);
@@ -143,7 +192,7 @@ const AddTransactionModal = () => {
                         </div>
 
                         <form onSubmit={handleSubmit} className="space-y-6">
-                            {/* Amount & Mic */}
+                            {/* Amount & Mic & Camera */}
                             <div>
                                 <label className="block text-xs text-muted mb-1">Monto</label>
                                 <div className="relative flex items-center gap-2">
@@ -158,6 +207,8 @@ const AddTransactionModal = () => {
                                             autoFocus
                                         />
                                     </div>
+
+                                    {/* Voice Input */}
                                     <button
                                         type="button"
                                         onClick={startListening}
@@ -166,8 +217,26 @@ const AddTransactionModal = () => {
                                     >
                                         <Mic size={24} />
                                     </button>
+
+                                    {/* Camera Input */}
+                                    <label className={`p-3 rounded-full cursor-pointer transition-all ${isScanning ? 'bg-blue-500 animate-pulse text-white' : 'bg-gray-800 text-blue-400 hover:bg-gray-700'}`}>
+                                        <input
+                                            type="file"
+                                            accept="image/*"
+                                            capture="environment"
+                                            className="hidden"
+                                            onChange={handleImageUpload}
+                                            disabled={isScanning}
+                                        />
+                                        {isScanning ? (
+                                            <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                                        ) : (
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z" /><circle cx="12" cy="13" r="3" /></svg>
+                                        )}
+                                    </label>
                                 </div>
                                 {isListening && <p className="text-xs text-primary mt-1 animate-pulse">Escuchando... Di algo como "Gasto de 50 en comida"</p>}
+                                {isScanning && <p className="text-xs text-blue-400 mt-1 animate-pulse">Analizando recibo con IA...</p>}
                             </div>
 
                             {/* Payment Method */}
