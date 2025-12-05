@@ -1,5 +1,14 @@
 import React, { createContext, useContext, useState, useMemo, useEffect } from 'react';
-import { fetchTransactions, fetchMembers, addTransaction as apiAddTransaction, deleteTransaction as apiDeleteTransaction, subscribeToTransactions } from '../api';
+import {
+    fetchTransactions,
+    fetchMembers,
+    addTransaction as apiAddTransaction,
+    deleteTransaction as apiDeleteTransaction,
+    subscribeToTransactions,
+    fetchBudgets,
+    addBudget as apiAddBudget,
+    deleteBudget as apiDeleteBudget
+} from '../api';
 import { isSameMonth, parseISO, startOfMonth } from 'date-fns';
 import { supabase } from '../supabaseClient';
 
@@ -16,6 +25,7 @@ export const useFinanzas = () => {
 export const FinanzasProvider = ({ children }) => {
     const [transactions, setTransactions] = useState([]);
     const [users, setUsers] = useState([]);
+    const [budgets, setBudgets] = useState([]);
     const [currentUserFilter, setCurrentUserFilter] = useState('all'); // 'all' | userId
     const [currentMonth, setCurrentMonth] = useState(new Date());
     const [loading, setLoading] = useState(true);
@@ -42,19 +52,18 @@ export const FinanzasProvider = ({ children }) => {
             if (!session?.user) {
                 setTransactions([]);
                 setUsers([]);
+                setBudgets([]);
                 setLoading(false);
                 return;
             }
 
             setLoading(true);
-            const [transactionsData, membersData] = await Promise.all([
+            const [transactionsData, membersData, budgetsData] = await Promise.all([
                 fetchTransactions(),
-                fetchMembers()
+                fetchMembers(),
+                fetchBudgets()
             ]);
 
-            // Filtrar transacciones por usuario autenticado (aunque RLS debería encargarse, esto es doble seguridad/conveniencia)
-            // Asumimos que fetchTransactions ya trae todo lo que el usuario PUEDE ver (gracias a RLS)
-            // Pero necesitamos mapear los campos correctamente
             const formattedData = transactionsData.map(t => ({
                 id: t.id,
                 date: t.created_at,
@@ -66,16 +75,9 @@ export const FinanzasProvider = ({ children }) => {
                 description: t.description
             }));
 
-            // Filtrar miembros para mostrar solo el del usuario actual (o todos si es compartido, pero por ahora personal)
-            // Si queremos que sea multi-usuario real, deberíamos ver todos los miembros de la "familia" o grupo.
-            // Por ahora, el requerimiento dice "Vincula la tabla members con auth.users".
-            // Vamos a mostrar el miembro asociado a este usuario.
-            const userMember = membersData.find(m => m.user_id === session.user.id);
-            // Si no existe miembro, tal vez el trigger falló o es el primer login antes del trigger?
-            // El trigger debería crearlo.
-
             setTransactions(formattedData);
-            setUsers(membersData); // Mostramos todos los miembros que RLS permita ver (el propio)
+            setUsers(membersData);
+            setBudgets(budgetsData);
             setLoading(false);
         };
 
@@ -84,12 +86,9 @@ export const FinanzasProvider = ({ children }) => {
         if (!session?.user) return;
 
         const unsubscribe = subscribeToTransactions((payload) => {
-            // Solo procesar si pertenece al usuario (aunque el canal podría filtrar, mejor asegurar)
-            // Nota: payload.new.user_id podría no estar disponible en DELETE
-
             if (payload.eventType === 'INSERT') {
                 const newT = payload.new;
-                if (newT.user_id !== session.user.id) return; // Ignorar si no es mío
+                if (newT.user_id !== session.user.id) return;
 
                 const formattedT = {
                     id: newT.id,
@@ -138,7 +137,7 @@ export const FinanzasProvider = ({ children }) => {
         // Filtro por mes
         filtered = filtered.filter(t => isSameMonth(parseISO(t.date), currentMonth));
 
-        // Filtro por usuario (ahora redundante si solo cargamos los del usuario, pero útil si hay múltiples miembros en una cuenta)
+        // Filtro por usuario
         if (currentUserFilter !== 'all') {
             filtered = filtered.filter(t => t.userId === currentUserFilter);
         }
@@ -173,7 +172,7 @@ export const FinanzasProvider = ({ children }) => {
             type: transaction.type,
             category: transaction.category,
             payment_method: transaction.paymentMethod,
-            user_id: session.user.id, // Usar ID de sesión
+            user_id: session.user.id,
             description: transaction.description,
             date: transaction.date
         };
@@ -194,6 +193,31 @@ export const FinanzasProvider = ({ children }) => {
         }
     };
 
+    // Budget Functions
+    const addBudget = async (category, amount) => {
+        if (!session?.user) return;
+        try {
+            const newBudget = await apiAddBudget({
+                category,
+                amount_limit: amount,
+                user_id: session.user.id
+            });
+            setBudgets(prev => [...prev, newBudget]);
+        } catch (error) {
+            console.error("Error adding budget:", error);
+            alert("Error al guardar el presupuesto.");
+        }
+    };
+
+    const deleteBudget = async (id) => {
+        try {
+            await apiDeleteBudget(id);
+            setBudgets(prev => prev.filter(b => b.id !== id));
+        } catch (error) {
+            console.error("Error deleting budget:", error);
+        }
+    };
+
     const value = {
         users,
         transactions: filteredTransactions,
@@ -207,7 +231,10 @@ export const FinanzasProvider = ({ children }) => {
         deleteTransaction,
         getExpensesByCategory,
         loading,
-        session // Exportar sesión
+        session,
+        budgets,
+        addBudget,
+        deleteBudget
     };
 
     return (

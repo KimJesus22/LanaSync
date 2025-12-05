@@ -116,3 +116,42 @@ export const subscribeToTransactions = (callback) => {
         supabase.removeChannel(subscription);
     };
 };
+
+// Budgets API
+export const fetchBudgets = async () => {
+    const { data, error } = await supabase
+        .from('budgets')
+        .select('*')
+        .order('created_at', { ascending: true });
+
+    if (error) {
+        console.error('Error fetching budgets:', error);
+        return [];
+    }
+    return data;
+};
+
+export const addBudget = async (budget) => {
+    const { data, error } = await supabase
+        .from('budgets')
+        .insert([budget])
+        .select();
+
+    if (error) {
+        console.error('Error adding budget:', error);
+        throw error;
+    }
+    return data[0];
+};
+
+export const deleteBudget = async (id) => {
+    const { error } = await supabase
+        .from('budgets')
+        .delete()
+        .eq('id', id);
+
+    if (error) {
+        console.error('Error deleting budget:', error);
+        throw error;
+    }
+};
