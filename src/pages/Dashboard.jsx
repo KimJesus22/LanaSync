@@ -18,7 +18,10 @@ const Dashboard = () => {
         getExpensesByCategory,
         recurringExpenses,
         transactions,
-        addTransaction
+        addTransaction,
+        isOnline,
+        pendingTransactions,
+        syncNotification
     } = useFinanzas();
 
     const [showAchievementModal, setShowAchievementModal] = useState(false);
@@ -99,6 +102,21 @@ const Dashboard = () => {
 
     return (
         <div className="space-y-4 relative">
+            {/* Offline Indicator */}
+            {!isOnline && (
+                <div className="bg-red-500/90 backdrop-blur-sm text-white p-3 rounded-lg text-center text-sm font-bold animate-pulse flex items-center justify-center gap-2">
+                    <span className="text-lg">📡</span>
+                    Modo Sin Conexión - {pendingTransactions.length} cambios pendientes
+                </div>
+            )}
+
+            {/* Sync Notification */}
+            {syncNotification && (
+                <div className="fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-xl shadow-lg z-[100] animate-in fade-in slide-in-from-top-2 flex items-center gap-2 font-bold">
+                    <span>✅</span>
+                    {syncNotification}
+                </div>
+            )}
             <header className="mb-4 flex justify-between items-center">
                 <div>
                     <h1 className="text-2xl font-bold text-white">

@@ -12,6 +12,7 @@ import {
     addRecurringExpense as apiAddRecurringExpense,
     deleteRecurringExpense as apiDeleteRecurringExpense
 } from '../api';
+import { useOfflineSync } from '../hooks/useOfflineSync';
 import { isSameMonth, parseISO, startOfMonth } from 'date-fns';
 import { supabase } from '../supabaseClient';
 
@@ -34,6 +35,8 @@ export const FinanzasProvider = ({ children }) => {
     const [currentMonth, setCurrentMonth] = useState(new Date());
     const [loading, setLoading] = useState(true);
     const [session, setSession] = useState(null);
+
+    const { isOnline, pendingTransactions, addOfflineTransaction, syncNotification } = useOfflineSync();
 
     // Manejar sesión de Supabase
     useEffect(() => {
@@ -185,10 +188,18 @@ export const FinanzasProvider = ({ children }) => {
         };
 
         try {
-            await apiAddTransaction(dbTransaction);
+            const result = await addOfflineTransaction(dbTransaction);
+            if (result?.offline) {
+                // Optional: Optimistically update UI or just rely on the pending indicator
+                // For now, we rely on the indicator as per requirements
+                // But we can alert the user
+                // alert("Guardado en modo sin conexión"); 
+                // The requirement says: "Si navigator.onLine es false, guarda la transacción en localStorage... Muestra un indicador visual..."
+                // It doesn't say show an alert.
+            }
         } catch (error) {
             console.error("Error al agregar transacción:", error);
-            alert("Error al guardar la transacción. Verifica tu conexión a internet.");
+            alert("Error al guardar la transacción.");
         }
     };
 
@@ -268,7 +279,11 @@ export const FinanzasProvider = ({ children }) => {
         deleteBudget,
         recurringExpenses,
         addRecurringExpense,
-        deleteRecurringExpense
+        addRecurringExpense,
+        deleteRecurringExpense,
+        isOnline,
+        pendingTransactions,
+        syncNotification
     };
 
     return (
