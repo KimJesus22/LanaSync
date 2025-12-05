@@ -1,0 +1,46 @@
+{
+    "dashboard": {
+        "title": "Dashboard",
+        "total_balance": "Total Balance",
+        "add_transaction": "Add Transaction",
+        "recent_transactions": "Recent Transactions",
+        "no_transactions": "No recent transactions.",
+        "offline_mode": "Offline Mode",
+        "pending_changes": "pending changes",
+        "sync_success": "Sync completed"
+    },
+    "settings": {
+        "title": "Settings",
+        "subtitle": "Adjustments and tools",
+        "language": "Language",
+        "data_portability": "Data & Portability",
+        "monthly_report": "Monthly Report",
+        "download_csv": "Download CSV",
+        "download_pdf": "Download PDF",
+        "recurring_expenses": "Recurring Expenses",
+        "recurring_desc": "The app will remind you of these payments.",
+        "new_recurring": "New Recurring Expense",
+        "add": "Add",
+        "account": "Account",
+        "session": "Session",
+        "logout_desc": "Log out from this device",
+        "logout": "Log Out",
+        "group_management": "Group Management",
+        "create_group": "Create Group",
+        "plan": "Plan"
+    },
+    "common": {
+        "loading": "Loading...",
+        "error": "Error",
+        "success": "Success",
+        "cancel": "Cancel",
+        "confirm": "Confirm",
+        "save": "Save",
+        "delete": "Delete",
+        "edit": "Edit",
+        "date": "Date",
+        "amount": "Amount",
+        "description": "Description",
+        "category": "Category"
+    }
+}

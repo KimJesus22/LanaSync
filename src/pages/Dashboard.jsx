@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Users } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import confetti from 'canvas-confetti';
 import { useFinanzas } from '../context/FinanzasContext';
 import MonthSelector from '../components/MonthSelector';
@@ -15,6 +16,7 @@ import Leaderboard from '../components/Leaderboard';
 import OneSignal from 'react-onesignal';
 
 const Dashboard = () => {
+    const { t } = useTranslation();
     const {
         users,
         currentUserFilter,
@@ -115,7 +117,7 @@ const Dashboard = () => {
             {!isOnline && (
                 <div className="bg-red-500/90 backdrop-blur-sm text-white p-3 rounded-lg text-center text-sm font-bold animate-pulse flex items-center justify-center gap-2">
                     <span className="text-lg">📡</span>
-                    Modo Sin Conexión - {pendingTransactions.length} cambios pendientes
+                    {t('dashboard.offline_mode')} - {pendingTransactions.length} {t('dashboard.pending_changes')}
                 </div>
             )}
 
@@ -123,7 +125,7 @@ const Dashboard = () => {
             {syncNotification && (
                 <div className="fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-xl shadow-lg z-[100] animate-in fade-in slide-in-from-top-2 flex items-center gap-2 font-bold">
                     <span>✅</span>
-                    {syncNotification}
+                    {t('dashboard.sync_success')}
                 </div>
             )}
             <header className="mb-4 flex justify-between items-center">
@@ -131,7 +133,7 @@ const Dashboard = () => {
                     <h1 className="text-2xl font-bold text-white">
                         {currentUserFilter === 'all' ? 'Familia' : users.find(u => u.id === currentUserFilter)?.name}
                     </h1>
-                    <p className="text-xs text-muted">Resumen Financiero</p>
+                    <p className="text-xs text-muted">{t('dashboard.title')}</p>
                 </div>
 
                 {/* User Filter */}

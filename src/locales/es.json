@@ -1,0 +1,46 @@
+{
+    "dashboard": {
+        "title": "Panel de Control",
+        "total_balance": "Saldo Total",
+        "add_transaction": "Agregar Transacción",
+        "recent_transactions": "Movimientos Recientes",
+        "no_transactions": "No hay movimientos recientes.",
+        "offline_mode": "Modo Sin Conexión",
+        "pending_changes": "cambios pendientes",
+        "sync_success": "Sincronización completada"
+    },
+    "settings": {
+        "title": "Configuración",
+        "subtitle": "Ajustes y herramientas",
+        "language": "Idioma",
+        "data_portability": "Datos y Portabilidad",
+        "monthly_report": "Reporte Mensual",
+        "download_csv": "Descargar CSV",
+        "download_pdf": "Descargar PDF",
+        "recurring_expenses": "Gastos Recurrentes",
+        "recurring_desc": "La app te recordará estos pagos.",
+        "new_recurring": "Nuevo Gasto Recurrente",
+        "add": "Agregar",
+        "account": "Cuenta",
+        "session": "Sesión",
+        "logout_desc": "Cerrar sesión en este dispositivo",
+        "logout": "Cerrar Sesión",
+        "group_management": "Gestión de Grupos",
+        "create_group": "Crear Grupo",
+        "plan": "Plan"
+    },
+    "common": {
+        "loading": "Cargando...",
+        "error": "Error",
+        "success": "Éxito",
+        "cancel": "Cancelar",
+        "confirm": "Confirmar",
+        "save": "Guardar",
+        "delete": "Eliminar",
+        "edit": "Editar",
+        "date": "Fecha",
+        "amount": "Monto",
+        "description": "Descripción",
+        "category": "Categoría"
+    }
+}

@@ -6,8 +6,10 @@ import { Card } from '../components/ui/Card';
 import { supabase } from '../supabaseClient';
 import { PDFDownloadLink } from '@react-pdf/renderer';
 import MonthlyReport from '../components/MonthlyReport';
+import { useTranslation } from 'react-i18next';
 
 const Configuracion = () => {
+    const { t, i18n } = useTranslation();
     const {
         transactions,
         currentMonth,
@@ -33,15 +35,37 @@ const Configuracion = () => {
         exportToCSV(transactions, currentMonth, users);
     };
 
+    const changeLanguage = (lng) => {
+        i18n.changeLanguage(lng);
+    };
+
     return (
         <div className="space-y-6">
-            <header>
-                <h1 className="text-2xl font-bold text-white">Configuración</h1>
-                <p className="text-xs text-muted">Ajustes y herramientas</p>
+            <header className="flex justify-between items-center">
+                <div>
+                    <h1 className="text-2xl font-bold text-white">{t('settings.title')}</h1>
+                    <p className="text-xs text-muted">{t('settings.subtitle')}</p>
+                </div>
+                <div className="flex gap-2">
+                    <button
+                        onClick={() => changeLanguage('es')}
+                        className={`text-2xl hover:scale-110 transition-transform ${i18n.language === 'es' ? 'opacity-100' : 'opacity-50'}`}
+                        title="Español"
+                    >
+                        🇲🇽
+                    </button>
+                    <button
+                        onClick={() => changeLanguage('en')}
+                        className={`text-2xl hover:scale-110 transition-transform ${i18n.language === 'en' ? 'opacity-100' : 'opacity-50'}`}
+                        title="English"
+                    >
+                        🇺🇸
+                    </button>
+                </div>
             </header>
 
             <section className="space-y-4">
-                <h2 className="text-lg font-semibold text-white">Gestión de Grupos</h2>
+                <h2 className="text-lg font-semibold text-white">{t('settings.group_management')}</h2>
                 <Card className="p-4 flex items-center justify-between bg-surface border-none shadow-lg">
                     <div>
                         <h3 className="font-medium text-white flex items-center gap-2">
@@ -49,7 +73,7 @@ const Configuracion = () => {
                             {userGroup?.name || 'Sin Grupo'}
                         </h3>
                         <p className="text-xs text-muted">
-                            Plan: <span className={subscriptionStatus === 'PREMIUM' ? 'text-accent font-bold' : 'text-gray-400'}>{subscriptionStatus}</span>
+                            {t('settings.plan')}: <span className={subscriptionStatus === 'PREMIUM' ? 'text-accent font-bold' : 'text-gray-400'}>{subscriptionStatus}</span>
                         </p>
                     </div>
                     <button
@@ -63,23 +87,23 @@ const Configuracion = () => {
                         className="bg-gray-800 hover:bg-gray-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 border border-gray-700"
                     >
                         <Plus className="w-4 h-4" />
-                        Crear Grupo
+                        {t('settings.create_group')}
                     </button>
                 </Card>
             </section>
 
             <section className="space-y-4">
-                <h2 className="text-lg font-semibold text-white">Datos y Portabilidad</h2>
+                <h2 className="text-lg font-semibold text-white">{t('settings.data_portability')}</h2>
                 <Card className="p-4 flex items-center justify-between">
                     <div>
-                        <h3 className="font-medium text-white">Reporte Mensual</h3>
-                        <p className="text-xs text-muted">Descarga tus movimientos en CSV</p>
+                        <h3 className="font-medium text-white">{t('settings.monthly_report')}</h3>
+                        <p className="text-xs text-muted">{t('settings.download_csv')}</p>
                     </div>
                     <div className="flex gap-2">
                         <button
                             onClick={handleDownload}
                             className="bg-gray-700 text-white p-3 rounded-full hover:bg-gray-600 transition-colors"
-                            title="Descargar CSV"
+                            title={t('settings.download_csv')}
                         >
                             <Download size={24} />
                         </button>
@@ -96,7 +120,7 @@ const Configuracion = () => {
                             }
                             fileName={`reporte_mensual_${currentMonth.toISOString().slice(0, 7)}.pdf`}
                             className="bg-primary/20 text-primary p-3 rounded-full hover:bg-primary/30 transition-colors flex items-center justify-center"
-                            title="Descargar PDF"
+                            title={t('settings.download_pdf')}
                         >
                             {({ loading }) =>
                                 loading ? '...' : <FileText size={24} />
@@ -107,8 +131,8 @@ const Configuracion = () => {
             </section>
 
             <section className="space-y-4">
-                <h2 className="text-lg font-semibold text-white">Gastos Recurrentes</h2>
-                <p className="text-xs text-muted">La app te recordará estos pagos.</p>
+                <h2 className="text-lg font-semibold text-white">{t('settings.recurring_expenses')}</h2>
+                <p className="text-xs text-muted">{t('settings.recurring_desc')}</p>
 
                 <div className="space-y-3">
                     {recurringExpenses.map(expense => (
@@ -116,7 +140,7 @@ const Configuracion = () => {
                             <div>
                                 <h3 className="font-medium text-white">{expense.name}</h3>
                                 <p className="text-xs text-muted">
-                                    ${expense.amount} • Día {expense.day_of_month} • {expense.category}
+                                    ${expense.amount} • {t('common.date')} {expense.day_of_month} • {expense.category}
                                 </p>
                             </div>
                             <button
@@ -144,11 +168,11 @@ const Configuracion = () => {
                     }}
                     className="bg-surface p-4 rounded-xl space-y-3 border border-gray-700"
                 >
-                    <h3 className="text-sm font-medium text-white">Nuevo Gasto Recurrente</h3>
+                    <h3 className="text-sm font-medium text-white">{t('settings.new_recurring')}</h3>
                     <div className="grid grid-cols-2 gap-3">
-                        <input name="name" placeholder="Nombre (ej: Netflix)" required className="bg-background rounded-lg p-2 text-sm text-white border border-gray-700" />
-                        <input name="amount" type="number" placeholder="Monto" required className="bg-background rounded-lg p-2 text-sm text-white border border-gray-700" />
-                        <input name="day" type="number" min="1" max="31" placeholder="Día del mes" required className="bg-background rounded-lg p-2 text-sm text-white border border-gray-700" />
+                        <input name="name" placeholder={t('common.description')} required className="bg-background rounded-lg p-2 text-sm text-white border border-gray-700" />
+                        <input name="amount" type="number" placeholder={t('common.amount')} required className="bg-background rounded-lg p-2 text-sm text-white border border-gray-700" />
+                        <input name="day" type="number" min="1" max="31" placeholder={t('common.date')} required className="bg-background rounded-lg p-2 text-sm text-white border border-gray-700" />
                         <select name="category" className="bg-background rounded-lg p-2 text-sm text-white border border-gray-700">
                             <option value="Servicios">Servicios</option>
                             <option value="Vivienda">Vivienda</option>
@@ -158,17 +182,17 @@ const Configuracion = () => {
                         </select>
                     </div>
                     <button type="submit" className="w-full bg-primary text-black font-bold py-2 rounded-lg text-sm">
-                        Agregar
+                        {t('settings.add')}
                     </button>
                 </form>
             </section>
 
             <section className="space-y-4">
-                <h2 className="text-lg font-semibold text-white">Cuenta</h2>
+                <h2 className="text-lg font-semibold text-white">{t('settings.account')}</h2>
                 <Card className="p-4 flex items-center justify-between">
                     <div>
-                        <h3 className="font-medium text-white">Sesión</h3>
-                        <p className="text-xs text-muted">Cerrar sesión en este dispositivo</p>
+                        <h3 className="font-medium text-white">{t('settings.session')}</h3>
+                        <p className="text-xs text-muted">{t('settings.logout_desc')}</p>
                     </div>
                     <button
                         onClick={async () => {
@@ -177,7 +201,7 @@ const Configuracion = () => {
                         }}
                         className="bg-red-500/20 text-red-500 px-4 py-2 rounded-lg hover:bg-red-500/30 transition-colors text-sm font-medium"
                     >
-                        Cerrar Sesión
+                        {t('settings.logout')}
                     </button>
                 </Card>
             </section>
