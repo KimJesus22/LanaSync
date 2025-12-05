@@ -6,22 +6,22 @@ const Navbar = () => {
     const navItems = [
         {
             name: 'Dashboard',
-            path: '/',
+            path: '/dashboard',
             icon: LayoutDashboard,
         },
         {
             name: 'Movimientos',
-            path: '/movimientos',
+            path: '/dashboard/movimientos',
             icon: ArrowRightLeft,
         },
         {
             name: 'Estadísticas',
-            path: '/estadisticas',
+            path: '/dashboard/estadisticas',
             icon: BarChart3,
         },
         {
             name: 'Configuración',
-            path: '/configuracion',
+            path: '/dashboard/configuracion',
             icon: Settings,
         },
     ];
@@ -35,6 +35,7 @@ const Navbar = () => {
                         <NavLink
                             key={item.path}
                             to={item.path}
+                            end={item.path === '/dashboard'}
                             className={({ isActive }) =>
                                 cn(
                                     "flex flex-col items-center justify-center w-full h-full space-y-1 transition-colors duration-200",

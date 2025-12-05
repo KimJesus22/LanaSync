@@ -18,6 +18,13 @@ const Landing = React.lazy(() => import('./pages/Landing'));
 const Legal = React.lazy(() => import('./pages/Legal'));
 import CookieBanner from './components/CookieBanner';
 
+// Admin Components
+import AdminRoute from './components/admin/AdminRoute';
+import AdminLayout from './components/admin/AdminLayout';
+const AdminDashboard = React.lazy(() => import('./pages/admin/AdminDashboard'));
+const UserManagement = React.lazy(() => import('./pages/admin/UserManagement'));
+const PricingConfig = React.lazy(() => import('./pages/admin/PricingConfig'));
+
 const ProtectedRoute = ({ children }) => {
   const { session, loading, userGroup, loadingGroup, setUserGroup } = useFinanzas();
 
@@ -90,6 +97,29 @@ function AppRoutes() {
           </Suspense>
         } />
         <Route path="pricing" element={<Pricing />} />
+      </Route>
+
+      {/* Admin Routes */}
+      <Route path="/admin" element={
+        <AdminRoute>
+          <AdminLayout />
+        </AdminRoute>
+      }>
+        <Route index element={
+          <Suspense fallback={<LoadingSpinner />}>
+            <AdminDashboard />
+          </Suspense>
+        } />
+        <Route path="users" element={
+          <Suspense fallback={<LoadingSpinner />}>
+            <UserManagement />
+          </Suspense>
+        } />
+        <Route path="pricing" element={
+          <Suspense fallback={<LoadingSpinner />}>
+            <PricingConfig />
+          </Suspense>
+        } />
       </Route>
     </Routes>
   );
