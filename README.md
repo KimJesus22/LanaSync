@@ -1,102 +1,97 @@
-# LanaSync 💸 | PWA de Finanzas Familiares en Tiempo Real
+# 💰 App de Finanzas Personales con IA
 
-> **Gestión financiera inteligente para familias modernas.**
-> *Arquitectura Serverless • Sincronización Real-Time • Diseño Mobile-First*
+Esta aplicación es un gestor de gastos inteligente diseñado para ayudar a los usuarios a controlar sus finanzas personales de manera eficiente, potenciado por Inteligencia Artificial.
 
-![Project Status](https://img.shields.io/badge/status-active-success.svg)
-![License](https://img.shields.io/badge/license-MIT-blue.svg)
+## 🚀 Características Principales
 
-## 📖 Sobre el Proyecto
+### 1. Autenticación y Usuarios
+- **Login/Registro**: Soporte para Email/Password, Magic Link y Google (vía Supabase Auth).
+- **Perfiles**: Cada usuario tiene su propio perfil y datos aislados (Row Level Security).
 
-**LanaSync** no es solo otra app de gastos. Es una solución de ingeniería diseñada para resolver un problema específico de la economía doméstica moderna: la gestión de **múltiples fuentes de liquidez** en un entorno colaborativo.
+### 2. Gestión de Transacciones
+- **Registro Manual**: Ingresos y Gastos con categoría, método de pago (Efectivo/Vales) y descripción.
+- **Registro por Voz 🎙️**:
+    - Toca el micrófono y di: *"Gasto de 200 pesos en comida"*.
+    - La app detecta automáticamente el monto, la categoría y la descripción.
+- **Escaneo de Recibos con IA 🧾**:
+    - Toca la cámara y toma una foto a tu ticket.
+    - **Google Gemini** analiza la imagen y extrae el total, la fecha y la categoría automáticamente.
 
-Construida como una **Progressive Web App (PWA)**, ofrece una experiencia nativa en Android/iOS sin la fricción de las tiendas de aplicaciones, garantizando que el control financiero esté siempre al alcance del bolsillo.
+### 3. Control de Presupuestos (Topes) 📊
+- Define límites de gasto por categoría (ej: $2000 para Comida).
+- **Barra de Progreso**: Visualiza cuánto has gastado.
+    - 🟢 Verde: < 75%
+    - 🟡 Amarillo: 75% - 99%
+    - 🔴 Rojo: > 100% (¡Alerta!)
 
-## 🛠️ Stack Tecnológico
+### 4. Gastos Recurrentes 🔄
+- Configura gastos fijos (Netflix, Renta, Gimnasio).
+- Se cargan automáticamente o sirven de recordatorio mensual.
 
-Diseñé la arquitectura enfocándome en la escalabilidad, el rendimiento y la experiencia de desarrollo (DX).
-
-*   **Frontend**: React 18 + Vite (Velocidad de build y HMR instantáneo).
-*   **Backend as a Service**: Supabase (PostgreSQL + Auth + Realtime).
-*   **Estilos**: Tailwind CSS (Sistema de diseño utilitario para UI consistente).
-*   **Iconografía**: Lucide React.
-*   **Visualización de Datos**: Recharts.
-*   **PWA**: `vite-plugin-pwa` con estrategia de caché y actualización automática.
-
-```mermaid
- graph TD
-    User((Usuario: Jesus/Adrian/Daniel)) -->|Interactúa UI| PWA[LanaSync PWA (React + Vite)]
-    PWA -->|Lectura/Escritura| SupaDB[(Supabase PostgreSQL)]
-    SupaDB -->|Realtime Subscription| PWA
-    
-    subgraph Lógica de Negocio
-    PWA -- Calcula --> Wallet1[Saldo Efectivo]
-    PWA -- Calcula --> Wallet2[Saldo Vales]
-    PWA -- Verifica --> Gamification[Motor de Logros]
-    end
-    
-    style PWA fill:#1f2937,stroke:#10b981,color:#fff
-    style SupaDB fill:#3ecf8e,stroke:#3ecf8e,color:#fff
-```
-
-## 💡 Engineering Highlights
-
-### 1. El Desafío de la Doble Divisa Lógica 💱
-La mayoría de las apps financieras agregan todos los activos en un solo "Patrimonio Neto". Sin embargo, en la realidad operativa de muchas familias, el **Efectivo** y los **Vales de Despensa** no son fungibles.
-*   **Solución**: Implementé una lógica de negocio estricta que segrega estos activos. El sistema calcula balances independientes y previene que el saldo de Vales infle la percepción de liquidez en efectivo ("Dinero Libre"), evitando decisiones de gasto erróneas.
-
-### 2. Sincronización en Tiempo Real (WebSockets) ⚡
-Para una pareja o familia, ver datos desactualizados es crítico.
-*   **Implementación**: Utilicé las suscripciones de **Supabase Realtime** para escuchar cambios (`INSERT`, `DELETE`) en la base de datos PostgreSQL.
-*   **Resultado**: Si el Usuario A agrega un gasto en el supermercado, el Dashboard del Usuario B se actualiza **en milisegundos** sin necesidad de refrescar la pantalla.
-
-### 3. Gamificación y UX 🎮
-El ahorro es un hábito difícil. Para reducir la fricción cognitiva:
-*   **Motivational Card**: Inyección de frases aleatorias para mantener el foco.
-*   **Sistema de Logros**: Lógica condicional que evalúa el comportamiento de gasto al cierre de mes (día 30) y recompensa visualmente (Confetti) si se cumplen las metas de austeridad en categorías críticas como "Ocio".
-
-## 🚀 Instalación y Despliegue
-
-Sigue estos pasos para correr el proyecto localmente:
-
-### Prerrequisitos
-*   Node.js (v16+)
-*   Cuenta en Supabase
-
-### Pasos
-
-1.  **Clonar el repositorio**
-    ```bash
-    git clone https://github.com/KimJesus22/LanaSync.git
-    cd lanasync
-    ```
-
-2.  **Instalar dependencias**
-    ```bash
-    npm install
-    ```
-
-3.  **Configurar Variables de Entorno**
-    Crea un archivo `.env` en la raíz y agrega tus credenciales de Supabase:
-    ```env
-    VITE_SUPABASE_URL=tu_url_de_supabase
-    VITE_SUPABASE_ANON_KEY=tu_anon_key
-    ```
-
-4.  **Base de Datos (SQL)**
-    Ejecuta el script de migración incluido (`members_migration.sql`) en el SQL Editor de Supabase para configurar las tablas y políticas RLS.
-
-5.  **Correr en Desarrollo**
-    ```bash
-    npm run dev
-    ```
-
-## 📱 Instalación en Móvil (PWA)
-
-1.  Accede a la aplicación desde Chrome en Android o Safari en iOS.
-2.  Selecciona **"Agregar a la pantalla de inicio"**.
-3.  La app se instalará como una aplicación nativa, eliminando la barra de navegación del navegador.
+### 5. Asistente Financiero IA 🤖
+- Un chat flotante siempre disponible.
+- **Contexto Inteligente**: La IA conoce tus saldos y gastos actuales.
+- **Consultas**: Pregunta *"¿Puedo gastar 500 pesos?"* y recibe consejos personalizados basados en tu realidad financiera.
 
 ---
 
-Desarrollado con ❤️ y ☕ por [KimJesus21].
+## 🛠️ Arquitectura Técnica
+
+### Frontend
+- **Framework**: React + Vite
+- **Estilos**: Tailwind CSS
+- **Iconos**: Lucide React
+- **Estado**: Context API (`FinanzasContext`)
+
+### Backend (Supabase)
+- **Base de Datos**: PostgreSQL
+- **Auth**: Supabase Auth
+- **Almacenamiento**: Supabase Storage (para avatares, opcional)
+- **Edge Functions (Deno)**:
+    1.  `scan-receipt`: Procesa imágenes de recibos con Gemini Vision.
+    2.  `financial-advisor`: Chatbot financiero con contexto de base de datos.
+
+### Esquema de Base de Datos
+- `transactions`: Movimientos financieros.
+- `members`: Perfiles de usuario.
+- `budgets`: Presupuestos por categoría.
+- `recurring_expenses`: Gastos fijos.
+
+---
+
+## 📦 Despliegue
+
+### 1. Supabase (Backend)
+Las Edge Functions requieren la variable de entorno `GEMINI_API_KEY`.
+
+```bash
+# Configurar API Key
+npx supabase secrets set GEMINI_API_KEY=tu_api_key
+
+# Desplegar Funciones
+npx supabase functions deploy scan-receipt --no-verify-jwt
+npx supabase functions deploy financial-advisor --no-verify-jwt
+```
+
+### 2. Vercel (Frontend)
+Para asegurar **Zero Downtime Deployments**, configura el comando de construcción para correr los tests antes del build:
+
+- **Build Command**: `npm run test && npm run build`
+- **Output Directory**: `dist`
+- **Environment Variables**:
+    - `VITE_SUPABASE_URL`
+    - `VITE_SUPABASE_ANON_KEY`
+
+---
+
+## 🧪 Testing
+El proyecto incluye tests unitarios con **Vitest**.
+
+```bash
+npm run test
+```
+
+## 🔮 Futuras Mejoras
+- Gráficos avanzados de tendencias.
+- Exportación a Excel/PDF.
+- Metas de ahorro compartidas.

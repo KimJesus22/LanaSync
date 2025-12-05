@@ -1,5 +1,6 @@
 import { Outlet } from 'react-router-dom';
 import Navbar from './Navbar';
+import AIAssistant from './AIAssistant';
 
 const Layout = () => {
     return (
@@ -7,6 +8,7 @@ const Layout = () => {
             <main className="container mx-auto px-4 py-6 max-w-md">
                 <Outlet />
             </main>
+            <AIAssistant />
             <Navbar />
         </div>
     );
