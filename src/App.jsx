@@ -1,13 +1,18 @@
+import React, { Suspense } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Layout from './components/Layout';
-import Dashboard from './pages/Dashboard';
-import Movimientos from './pages/Movimientos';
-import Estadisticas from './pages/Estadisticas';
-import Configuracion from './pages/Configuracion';
-
 import { FinanzasProvider } from './context/FinanzasContext';
-
 import Login from './pages/Login';
+import { useFinanzas } from './context/FinanzasContext';
+import { Navigate } from 'react-router-dom';
+import OnboardingGroup from './components/OnboardingGroup';
+import LoadingSpinner from './components/LoadingSpinner';
+
+// Lazy Load Pages
+const Dashboard = React.lazy(() => import('./pages/Dashboard'));
+const Movimientos = React.lazy(() => import('./pages/Movimientos'));
+const Estadisticas = React.lazy(() => import('./pages/Estadisticas'));
+const Configuracion = React.lazy(() => import('./pages/Configuracion'));
 import { useFinanzas } from './context/FinanzasContext';
 import { Navigate } from 'react-router-dom';
 import OnboardingGroup from './components/OnboardingGroup';
@@ -37,10 +42,26 @@ function AppRoutes() {
           <Layout />
         </ProtectedRoute>
       }>
-        <Route index element={<Dashboard />} />
-        <Route path="movimientos" element={<Movimientos />} />
-        <Route path="estadisticas" element={<Estadisticas />} />
-        <Route path="configuracion" element={<Configuracion />} />
+        <Route index element={
+          <Suspense fallback={<LoadingSpinner />}>
+            <Dashboard />
+          </Suspense>
+        } />
+        <Route path="movimientos" element={
+          <Suspense fallback={<LoadingSpinner />}>
+            <Movimientos />
+          </Suspense>
+        } />
+        <Route path="estadisticas" element={
+          <Suspense fallback={<LoadingSpinner />}>
+            <Estadisticas />
+          </Suspense>
+        } />
+        <Route path="configuracion" element={
+          <Suspense fallback={<LoadingSpinner />}>
+            <Configuracion />
+          </Suspense>
+        } />
       </Route>
     </Routes>
   );

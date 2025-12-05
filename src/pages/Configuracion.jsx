@@ -1,8 +1,13 @@
 import { Download } from 'lucide-react';
 import { useFinanzas } from '../context/FinanzasContext';
 import { exportToCSV } from '../lib/utils';
+import { Download, FileText } from 'lucide-react';
+import { useFinanzas } from '../context/FinanzasContext';
+import { exportToCSV } from '../lib/utils';
 import { Card } from '../components/ui/Card';
 import { supabase } from '../supabaseClient';
+import { PDFDownloadLink } from '@react-pdf/renderer';
+import MonthlyReport from '../components/MonthlyReport';
 
 const Configuracion = () => {
     const {
@@ -11,8 +16,20 @@ const Configuracion = () => {
         users,
         recurringExpenses,
         addRecurringExpense,
-        deleteRecurringExpense
+        deleteRecurringExpense,
+        saldoEfectivo,
+        saldoVales,
+        getExpensesByCategory
     } = useFinanzas();
+
+    // Calculate totals for the report
+    const totalIncome = transactions
+        .filter(t => t.type === 'ingreso')
+        .reduce((acc, curr) => acc + curr.amount, 0);
+
+    const totalExpenses = transactions
+        .filter(t => t.type === 'gasto')
+        .reduce((acc, curr) => acc + curr.amount, 0);
 
     const handleDownload = () => {
         exportToCSV(transactions, currentMonth, users);
@@ -32,12 +49,33 @@ const Configuracion = () => {
                         <h3 className="font-medium text-white">Reporte Mensual</h3>
                         <p className="text-xs text-muted">Descarga tus movimientos en CSV</p>
                     </div>
-                    <button
-                        onClick={handleDownload}
-                        className="bg-primary/20 text-primary p-3 rounded-full hover:bg-primary/30 transition-colors"
-                    >
-                        <Download size={24} />
-                    </button>
+                    <div className="flex gap-2">
+                        <button
+                            onClick={handleDownload}
+                            className="bg-gray-700 text-white p-3 rounded-full hover:bg-gray-600 transition-colors"
+                            title="Descargar CSV"
+                        >
+                            <Download size={24} />
+                        </button>
+
+                        <PDFDownloadLink
+                            document={
+                                <MonthlyReport
+                                    transactions={transactions}
+                                    currentMonth={currentMonth}
+                                    income={totalIncome}
+                                    expenses={totalExpenses}
+                                />
+                            }
+                            fileName={`reporte_mensual_${currentMonth.toISOString().slice(0, 7)}.pdf`}
+                            className="bg-primary/20 text-primary p-3 rounded-full hover:bg-primary/30 transition-colors flex items-center justify-center"
+                            title="Descargar PDF"
+                        >
+                            {({ blob, url, loading, error }) =>
+                                loading ? '...' : <FileText size={24} />
+                            }
+                        </PDFDownloadLink>
+                    </div>
                 </Card>
             </section>
 
