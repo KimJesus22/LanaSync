@@ -1,5 +1,58 @@
 import { supabase } from './supabaseClient';
 
+export const createGroup = async (groupName, userId) => {
+    // 1. Create Group
+    const { data: group, error: groupError } = await supabase
+        .from('groups')
+        .insert([{ name: groupName }])
+        .select()
+        .single();
+
+    if (groupError) throw groupError;
+
+    // 2. Add user to group
+    const { error: memberError } = await supabase
+        .from('members')
+        .update({ group_id: group.id })
+        .eq('user_id', userId); // Assuming user_id links to auth user
+
+    if (memberError) throw memberError;
+
+    return group;
+};
+
+export const joinGroup = async (inviteCode, userId) => {
+    // 1. Find Group
+    const { data: group, error: groupError } = await supabase
+        .from('groups')
+        .select('*')
+        .eq('invite_code', inviteCode)
+        .single();
+
+    if (groupError) throw new Error('Grupo no encontrado');
+
+    // 2. Add user to group
+    const { error: memberError } = await supabase
+        .from('members')
+        .update({ group_id: group.id })
+        .eq('user_id', userId);
+
+    if (memberError) throw memberError;
+
+    return group;
+};
+
+export const fetchUserGroup = async (userId) => {
+    const { data, error } = await supabase
+        .from('members')
+        .select('group_id, groups(*)')
+        .eq('user_id', userId)
+        .single();
+
+    if (error) return null;
+    return data?.groups;
+};
+
 export const fetchTransactions = async () => {
     const { data, error } = await supabase
         .from('transactions')
@@ -42,7 +95,7 @@ export const fetchRecurringExpenses = async () => {
 export const addRecurringExpense = async (expense) => {
     const { data, error } = await supabase
         .from('recurring_expenses')
-        .insert([expense])
+        .insert([{ ...expense, group_id: expense.group_id }])
         .select();
 
     if (error) {
@@ -75,6 +128,7 @@ export const addTransaction = async (transaction) => {
         .insert([
             {
                 ...rest,
+                group_id: transaction.group_id,
                 created_at: date || new Date().toISOString() // Use provided date or current
             }
         ])
@@ -134,7 +188,7 @@ export const fetchBudgets = async () => {
 export const addBudget = async (budget) => {
     const { data, error } = await supabase
         .from('budgets')
-        .insert([budget])
+        .insert([{ ...budget, group_id: budget.group_id }])
         .select();
 
     if (error) {
@@ -173,7 +227,7 @@ export const fetchSavingsGoals = async () => {
 export const addSavingsGoal = async (goal) => {
     const { data, error } = await supabase
         .from('savings_goals')
-        .insert([goal])
+        .insert([{ ...goal, group_id: goal.group_id }])
         .select();
 
     if (error) {

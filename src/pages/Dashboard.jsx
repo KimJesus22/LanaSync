@@ -12,6 +12,7 @@ import BudgetSection from '../components/BudgetSection';
 import FinancialProjection from '../components/FinancialProjection';
 import SavingsGoalsSection from '../components/SavingsGoalsSection';
 import Leaderboard from '../components/Leaderboard';
+import OneSignal from 'react-onesignal';
 
 const Dashboard = () => {
     const {
@@ -26,6 +27,11 @@ const Dashboard = () => {
         pendingTransactions,
         syncNotification
     } = useFinanzas();
+
+    useEffect(() => {
+        // Prompt for Push Notifications
+        OneSignal.Slidedown.promptPush();
+    }, []);
 
     const [showAchievementModal, setShowAchievementModal] = useState(false);
     const [dueExpense, setDueExpense] = useState(null);

@@ -14,7 +14,8 @@ import {
     fetchSavingsGoals,
     addSavingsGoal as apiAddSavingsGoal,
     updateSavingsGoalAmount as apiUpdateSavingsGoalAmount,
-    deleteSavingsGoal as apiDeleteSavingsGoal
+    deleteSavingsGoal as apiDeleteSavingsGoal,
+    fetchUserGroup
 } from '../api';
 import { useOfflineSync } from '../hooks/useOfflineSync';
 import { isSameMonth, parseISO, startOfMonth } from 'date-fns';
@@ -40,6 +41,8 @@ export const FinanzasProvider = ({ children }) => {
     const [currentMonth, setCurrentMonth] = useState(new Date());
     const [loading, setLoading] = useState(true);
     const [session, setSession] = useState(null);
+    const [userGroup, setUserGroup] = useState(null);
+    const [loadingGroup, setLoadingGroup] = useState(true);
 
     const { isOnline, pendingTransactions, addOfflineTransaction, syncNotification } = useOfflineSync();
 
@@ -67,10 +70,27 @@ export const FinanzasProvider = ({ children }) => {
                 setBudgets([]);
                 setRecurringExpenses([]);
                 setLoading(false);
+                setLoadingGroup(false);
                 return;
             }
 
             setLoading(true);
+            setLoadingGroup(true);
+
+            // 1. Fetch User Group
+            const group = await fetchUserGroup(session.user.id);
+            setUserGroup(group);
+            setLoadingGroup(false);
+
+            // If no group, stop loading data (we need group_id for RLS usually, or just to know context)
+            // But wait, if RLS is enabled, fetching transactions without group might return empty or error.
+            // Let's try to fetch data anyway, assuming RLS handles it or we filter by group if needed.
+            // Actually, if we strictly follow SaaS, we shouldn't fetch data if no group.
+            if (!group) {
+                setLoading(false);
+                return;
+            }
+
             const [transactionsData, membersData, budgetsData, recurringData, savingsGoalsData] = await Promise.all([
                 fetchTransactions(),
                 fetchMembers(),
@@ -193,6 +213,7 @@ export const FinanzasProvider = ({ children }) => {
             category: transaction.category,
             payment_method: transaction.paymentMethod,
             user_id: session.user.id,
+            group_id: userGroup?.id,
             description: transaction.description,
             date: transaction.date
         };
@@ -228,7 +249,8 @@ export const FinanzasProvider = ({ children }) => {
             const newBudget = await apiAddBudget({
                 category,
                 amount_limit: amount,
-                user_id: session.user.id
+                user_id: session.user.id,
+                group_id: userGroup?.id
             });
             setBudgets(prev => [...prev, newBudget]);
         } catch (error) {
@@ -252,7 +274,8 @@ export const FinanzasProvider = ({ children }) => {
         try {
             const newExpense = await apiAddRecurringExpense({
                 ...expense,
-                user_id: session.user.id
+                user_id: session.user.id,
+                group_id: userGroup?.id
             });
             setRecurringExpenses(prev => [...prev, newExpense]);
         } catch (error) {
@@ -278,7 +301,8 @@ export const FinanzasProvider = ({ children }) => {
                 name,
                 target_amount: targetAmount,
                 current_amount: 0,
-                user_id: session.user.id
+                user_id: session.user.id,
+                group_id: userGroup?.id
             });
             setSavingsGoals(prev => [...prev, newGoal]);
         } catch (error) {
@@ -338,7 +362,10 @@ export const FinanzasProvider = ({ children }) => {
         transferToGoal,
         isOnline,
         pendingTransactions,
-        syncNotification
+        syncNotification,
+        userGroup,
+        setUserGroup,
+        loadingGroup
     };
 
     return (

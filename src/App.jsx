@@ -10,14 +10,19 @@ import { FinanzasProvider } from './context/FinanzasContext';
 import Login from './pages/Login';
 import { useFinanzas } from './context/FinanzasContext';
 import { Navigate } from 'react-router-dom';
+import OnboardingGroup from './components/OnboardingGroup';
 
 const ProtectedRoute = ({ children }) => {
-  const { session, loading } = useFinanzas();
+  const { session, loading, userGroup, loadingGroup, setUserGroup } = useFinanzas();
 
-  if (loading) return <div className="min-h-screen bg-gray-900 flex items-center justify-center text-white">Cargando...</div>;
+  if (loading || loadingGroup) return <div className="min-h-screen bg-gray-900 flex items-center justify-center text-white">Cargando...</div>;
 
   if (!session) {
     return <Navigate to="/login" replace />;
+  }
+
+  if (!userGroup) {
+    return <OnboardingGroup userId={session.user.id} onGroupJoined={setUserGroup} />;
   }
 
   return children;
