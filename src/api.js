@@ -24,7 +24,6 @@ export const fetchMembers = async () => {
         return [];
     }
     return data;
-    return data;
 };
 
 export const fetchRecurringExpenses = async () => {

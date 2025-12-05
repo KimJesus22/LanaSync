@@ -6,13 +6,17 @@ const AddTransactionModal = () => {
     const { addTransaction, users } = useFinanzas();
     const [isOpen, setIsOpen] = useState(false);
 
+    const [type, setType] = useState('gasto'); // 'gasto' | 'ingreso'
     const [amount, setAmount] = useState('');
     const [paymentMethod, setPaymentMethod] = useState('efectivo'); // 'efectivo' | 'vales'
     const [description, setDescription] = useState('');
     const [category, setCategory] = useState('Comida');
     const [userId, setUserId] = useState(users[0]?.id || 'user-1'); // Default to first user
 
-    const categories = ['Comida', 'Transporte', 'Ocio', 'Moto', 'Universidad', 'Celular', 'Otros'];
+    const expenseCategories = ['Comida', 'Transporte', 'Ocio', 'Moto', 'Universidad', 'Celular', 'Otros'];
+    const incomeCategories = ['Salario', 'Regalo', 'Venta', 'Otros'];
+
+    const categories = type === 'gasto' ? expenseCategories : incomeCategories;
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -20,7 +24,7 @@ const AddTransactionModal = () => {
 
         const transaction = {
             amount: parseFloat(amount),
-            type: 'gasto', // Default to expense for now as per requirements imply spending
+            type,
             category,
             paymentMethod,
             userId,
@@ -34,6 +38,8 @@ const AddTransactionModal = () => {
         setAmount('');
         setDescription('');
         setIsOpen(false);
+        // Reset type to default or keep it? Let's keep it for convenience or reset. Resetting to gasto is safer.
+        setType('gasto');
     };
 
     return (
@@ -52,9 +58,27 @@ const AddTransactionModal = () => {
                     {/* Modal Content */}
                     <div className="bg-surface w-full md:max-w-md rounded-t-2xl md:rounded-2xl p-6 animate-in slide-in-from-bottom duration-300">
                         <div className="flex justify-between items-center mb-6">
-                            <h2 className="text-xl font-bold text-white">Nuevo Gasto</h2>
+                            <h2 className="text-xl font-bold text-white">
+                                {type === 'gasto' ? 'Nuevo Gasto' : 'Nuevo Ingreso'}
+                            </h2>
                             <button onClick={() => setIsOpen(false)} className="text-muted hover:text-white">
                                 <X size={24} />
+                            </button>
+                        </div>
+
+                        {/* Type Toggle */}
+                        <div className="flex bg-gray-800 rounded-lg p-1 mb-6">
+                            <button
+                                onClick={() => setType('gasto')}
+                                className={`flex-1 py-2 rounded-md text-sm font-medium transition-all ${type === 'gasto' ? 'bg-red-500/20 text-red-400' : 'text-muted hover:text-white'}`}
+                            >
+                                Gasto
+                            </button>
+                            <button
+                                onClick={() => setType('ingreso')}
+                                className={`flex-1 py-2 rounded-md text-sm font-medium transition-all ${type === 'ingreso' ? 'bg-green-500/20 text-green-400' : 'text-muted hover:text-white'}`}
+                            >
+                                Ingreso
                             </button>
                         </div>
 
@@ -63,12 +87,12 @@ const AddTransactionModal = () => {
                             <div>
                                 <label className="block text-xs text-muted mb-1">Monto</label>
                                 <div className="relative">
-                                    <span className="absolute left-0 top-1/2 -translate-y-1/2 text-2xl text-muted">$</span>
+                                    <span className={`absolute left-0 top-1/2 -translate-y-1/2 text-2xl ${type === 'gasto' ? 'text-red-400' : 'text-green-400'}`}>$</span>
                                     <input
                                         type="number"
                                         value={amount}
                                         onChange={(e) => setAmount(e.target.value)}
-                                        className="w-full bg-transparent border-b-2 border-gray-700 focus:border-primary text-4xl font-bold text-white pl-6 py-2 outline-none"
+                                        className={`w-full bg-transparent border-b-2 border-gray-700 focus:border-primary text-4xl font-bold text-white pl-6 py-2 outline-none ${type === 'gasto' ? 'focus:border-red-500' : 'focus:border-green-500'}`}
                                         placeholder="0.00"
                                         autoFocus
                                     />
@@ -81,8 +105,8 @@ const AddTransactionModal = () => {
                                     type="button"
                                     onClick={() => setPaymentMethod('efectivo')}
                                     className={`p-4 rounded-xl border-2 flex flex-col items-center gap-2 transition-all ${paymentMethod === 'efectivo'
-                                            ? 'border-primary bg-primary/10 text-primary'
-                                            : 'border-gray-700 text-muted hover:border-gray-600'
+                                        ? 'border-primary bg-primary/10 text-primary'
+                                        : 'border-gray-700 text-muted hover:border-gray-600'
                                         }`}
                                 >
                                     <Wallet size={24} />
@@ -92,8 +116,8 @@ const AddTransactionModal = () => {
                                     type="button"
                                     onClick={() => setPaymentMethod('vales')}
                                     className={`p-4 rounded-xl border-2 flex flex-col items-center gap-2 transition-all ${paymentMethod === 'vales'
-                                            ? 'border-accent bg-accent/10 text-accent'
-                                            : 'border-gray-700 text-muted hover:border-gray-600'
+                                        ? 'border-accent bg-accent/10 text-accent'
+                                        : 'border-gray-700 text-muted hover:border-gray-600'
                                         }`}
                                 >
                                     <CreditCard size={24} />
@@ -110,7 +134,7 @@ const AddTransactionModal = () => {
                                         value={description}
                                         onChange={(e) => setDescription(e.target.value)}
                                         className="w-full bg-gray-800 rounded-lg p-3 text-white outline-none focus:ring-2 focus:ring-primary/50"
-                                        placeholder="¿En qué gastaste?"
+                                        placeholder={type === 'gasto' ? "¿En qué gastaste?" : "¿De qué es el ingreso?"}
                                     />
                                 </div>
 
@@ -145,9 +169,9 @@ const AddTransactionModal = () => {
                             {/* Submit */}
                             <button
                                 type="submit"
-                                className="w-full bg-white text-black font-bold py-4 rounded-xl hover:bg-gray-200 transition-colors"
+                                className={`w-full text-black font-bold py-4 rounded-xl transition-colors ${type === 'gasto' ? 'bg-white hover:bg-gray-200' : 'bg-green-500 hover:bg-green-400'}`}
                             >
-                                Guardar Gasto
+                                {type === 'gasto' ? 'Guardar Gasto' : 'Guardar Ingreso'}
                             </button>
                         </form>
                     </div>

@@ -2,6 +2,7 @@ import { Download } from 'lucide-react';
 import { useFinanzas } from '../context/FinanzasContext';
 import { exportToCSV } from '../lib/utils';
 import { Card } from '../components/ui/Card';
+import { supabase } from '../supabaseClient';
 
 const Configuracion = () => {
     const {
@@ -95,6 +96,25 @@ const Configuracion = () => {
                         Agregar
                     </button>
                 </form>
+            </section>
+
+            <section className="space-y-4">
+                <h2 className="text-lg font-semibold text-white">Cuenta</h2>
+                <Card className="p-4 flex items-center justify-between">
+                    <div>
+                        <h3 className="font-medium text-white">Sesión</h3>
+                        <p className="text-xs text-muted">Cerrar sesión en este dispositivo</p>
+                    </div>
+                    <button
+                        onClick={async () => {
+                            await supabase.auth.signOut();
+                            window.location.reload();
+                        }}
+                        className="bg-red-500/20 text-red-500 px-4 py-2 rounded-lg hover:bg-red-500/30 transition-colors text-sm font-medium"
+                    >
+                        Cerrar Sesión
+                    </button>
+                </Card>
             </section>
 
             <div className="text-center text-xs text-muted mt-8">

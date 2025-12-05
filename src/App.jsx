@@ -7,18 +7,45 @@ import Configuracion from './pages/Configuracion';
 
 import { FinanzasProvider } from './context/FinanzasContext';
 
+import Login from './pages/Login';
+import { useFinanzas } from './context/FinanzasContext';
+import { Navigate } from 'react-router-dom';
+
+const ProtectedRoute = ({ children }) => {
+  const { session, loading } = useFinanzas();
+
+  if (loading) return <div className="min-h-screen bg-gray-900 flex items-center justify-center text-white">Cargando...</div>;
+
+  if (!session) {
+    return <Navigate to="/login" replace />;
+  }
+
+  return children;
+};
+
+function AppRoutes() {
+  return (
+    <Routes>
+      <Route path="/login" element={<Login />} />
+      <Route path="/" element={
+        <ProtectedRoute>
+          <Layout />
+        </ProtectedRoute>
+      }>
+        <Route index element={<Dashboard />} />
+        <Route path="movimientos" element={<Movimientos />} />
+        <Route path="estadisticas" element={<Estadisticas />} />
+        <Route path="configuracion" element={<Configuracion />} />
+      </Route>
+    </Routes>
+  );
+}
+
 function App() {
   return (
     <FinanzasProvider>
       <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Layout />}>
-            <Route index element={<Dashboard />} />
-            <Route path="movimientos" element={<Movimientos />} />
-            <Route path="estadisticas" element={<Estadisticas />} />
-            <Route path="configuracion" element={<Configuracion />} />
-          </Route>
-        </Routes>
+        <AppRoutes />
       </BrowserRouter>
     </FinanzasProvider>
   );
