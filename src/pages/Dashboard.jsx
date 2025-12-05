@@ -11,6 +11,7 @@ import MotivationalCard from '../components/MotivationalCard';
 import BudgetSection from '../components/BudgetSection';
 import FinancialProjection from '../components/FinancialProjection';
 import SavingsGoalsSection from '../components/SavingsGoalsSection';
+import Leaderboard from '../components/Leaderboard';
 
 const Dashboard = () => {
     const {
@@ -150,6 +151,8 @@ const Dashboard = () => {
             <MotivationalCard />
 
             <FinancialProjection />
+
+            <Leaderboard />
 
             <SavingsGoalsSection />
 

@@ -61,6 +61,8 @@ const AIAssistant = () => {
 
         } catch (error) {
             console.error("Error asking AI:", error);
+            console.log("Full error object:", JSON.stringify(error, null, 2));
+            alert("Error: " + JSON.stringify(error, null, 2));
             setMessages(prev => [...prev, { role: 'assistant', content: 'Lo siento, tuve un problema al pensar. Intenta de nuevo.' }]);
         } finally {
             setIsLoading(false);
@@ -101,8 +103,8 @@ const AIAssistant = () => {
                             >
                                 <div
                                     className={`max-w-[80%] p-3 rounded-2xl text-sm ${msg.role === 'user'
-                                            ? 'bg-indigo-600 text-white rounded-br-none'
-                                            : 'bg-gray-800 text-gray-200 rounded-bl-none border border-gray-700'
+                                        ? 'bg-indigo-600 text-white rounded-br-none'
+                                        : 'bg-gray-800 text-gray-200 rounded-bl-none border border-gray-700'
                                         }`}
                                 >
                                     {msg.content}
