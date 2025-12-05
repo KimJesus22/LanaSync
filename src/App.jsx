@@ -14,6 +14,9 @@ const Dashboard = React.lazy(() => import('./pages/Dashboard'));
 const Movimientos = React.lazy(() => import('./pages/Movimientos'));
 const Estadisticas = React.lazy(() => import('./pages/Estadisticas'));
 const Configuracion = React.lazy(() => import('./pages/Configuracion'));
+const Landing = React.lazy(() => import('./pages/Landing'));
+const Legal = React.lazy(() => import('./pages/Legal'));
+import CookieBanner from './components/CookieBanner';
 
 const ProtectedRoute = ({ children }) => {
   const { session, loading, userGroup, loadingGroup, setUserGroup } = useFinanzas();
@@ -31,11 +34,37 @@ const ProtectedRoute = ({ children }) => {
   return children;
 };
 
+const RootHandler = () => {
+  const { session, loading } = useFinanzas();
+
+  if (loading) return <LoadingSpinner />;
+
+  if (session) {
+    return <Navigate to="/dashboard" replace />;
+  }
+
+  return (
+    <Suspense fallback={<LoadingSpinner />}>
+      <Landing />
+    </Suspense>
+  );
+};
+
 function AppRoutes() {
   return (
     <Routes>
       <Route path="/login" element={<Login />} />
-      <Route path="/" element={
+      <Route path="/legal" element={
+        <Suspense fallback={<LoadingSpinner />}>
+          <Legal />
+        </Suspense>
+      } />
+
+      {/* Root Route: Landing or Redirect */}
+      <Route path="/" element={<RootHandler />} />
+
+      {/* Protected Dashboard Routes */}
+      <Route path="/dashboard" element={
         <ProtectedRoute>
           <Layout />
         </ProtectedRoute>
@@ -61,13 +90,6 @@ function AppRoutes() {
           </Suspense>
         } />
         <Route path="pricing" element={<Pricing />} />
-        <Route path="admin" element={
-          <AdminRoute>
-            <Suspense fallback={<LoadingSpinner />}>
-              <AdminDashboard />
-            </Suspense>
-          </AdminRoute>
-        } />
       </Route>
     </Routes>
   );
@@ -78,6 +100,7 @@ function App() {
     <FinanzasProvider>
       <BrowserRouter>
         <AppRoutes />
+        <CookieBanner />
       </BrowserRouter>
     </FinanzasProvider>
   );
