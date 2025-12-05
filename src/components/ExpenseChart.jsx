@@ -4,7 +4,7 @@ import { useFinanzas } from '../context/FinanzasContext';
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#AF19FF', '#FF4D4D'];
 
 const ExpenseChart = () => {
-    const { transactions, users } = useFinanzas();
+    const { transactions } = useFinanzas();
 
     // Filtrar solo gastos
     const gastos = transactions.filter(t => t.type === 'gasto');

@@ -13,9 +13,6 @@ const Dashboard = React.lazy(() => import('./pages/Dashboard'));
 const Movimientos = React.lazy(() => import('./pages/Movimientos'));
 const Estadisticas = React.lazy(() => import('./pages/Estadisticas'));
 const Configuracion = React.lazy(() => import('./pages/Configuracion'));
-import { useFinanzas } from './context/FinanzasContext';
-import { Navigate } from 'react-router-dom';
-import OnboardingGroup from './components/OnboardingGroup';
 
 const ProtectedRoute = ({ children }) => {
   const { session, loading, userGroup, loadingGroup, setUserGroup } = useFinanzas();

@@ -2,7 +2,6 @@ import React, { createContext, useContext, useState, useMemo, useEffect } from '
 import {
     fetchTransactions,
     fetchMembers,
-    addTransaction as apiAddTransaction,
     deleteTransaction as apiDeleteTransaction,
     subscribeToTransactions,
     fetchBudgets,
@@ -18,11 +17,12 @@ import {
     fetchUserGroup
 } from '../api';
 import { useOfflineSync } from '../hooks/useOfflineSync';
-import { isSameMonth, parseISO, startOfMonth } from 'date-fns';
+import { isSameMonth, parseISO } from 'date-fns';
 import { supabase } from '../supabaseClient';
 
 const FinanzasContext = createContext();
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useFinanzas = () => {
     const context = useContext(FinanzasContext);
     if (!context) {

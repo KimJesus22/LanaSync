@@ -6,7 +6,7 @@ import {
 } from 'recharts';
 import { useFinanzas } from '../context/FinanzasContext';
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, parseISO } from 'date-fns';
-import { es } from 'date-fns/locale';
+
 import { Card } from '../components/ui/Card';
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#AF19FF', '#FF1919'];
@@ -49,9 +49,12 @@ const Estadisticas = () => {
         const end = endOfMonth(currentMonth);
         const days = eachDayOfInterval({ start, end });
 
+
+
+        const data = [];
         let cumulativeBalance = 0;
 
-        return days.map(day => {
+        for (const day of days) {
             const dayTransactions = transactions.filter(t =>
                 isSameDay(parseISO(t.date), day)
             );
@@ -62,11 +65,13 @@ const Estadisticas = () => {
 
             cumulativeBalance += dayBalance;
 
-            return {
+            data.push({
                 day: format(day, 'd'),
                 saldo: cumulativeBalance
-            };
-        });
+            });
+        }
+
+        return data;
     }, [transactions, currentMonth]);
 
     return (

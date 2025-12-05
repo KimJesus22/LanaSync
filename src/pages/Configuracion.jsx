@@ -1,9 +1,6 @@
-import { Download } from 'lucide-react';
 import { useFinanzas } from '../context/FinanzasContext';
 import { exportToCSV } from '../lib/utils';
 import { Download, FileText } from 'lucide-react';
-import { useFinanzas } from '../context/FinanzasContext';
-import { exportToCSV } from '../lib/utils';
 import { Card } from '../components/ui/Card';
 import { supabase } from '../supabaseClient';
 import { PDFDownloadLink } from '@react-pdf/renderer';
@@ -17,9 +14,7 @@ const Configuracion = () => {
         recurringExpenses,
         addRecurringExpense,
         deleteRecurringExpense,
-        saldoEfectivo,
-        saldoVales,
-        getExpensesByCategory
+
     } = useFinanzas();
 
     // Calculate totals for the report
@@ -65,13 +60,14 @@ const Configuracion = () => {
                                     currentMonth={currentMonth}
                                     income={totalIncome}
                                     expenses={totalExpenses}
+                                    quote="El ahorro no es solo guardar dinero, es guardar libertad."
                                 />
                             }
                             fileName={`reporte_mensual_${currentMonth.toISOString().slice(0, 7)}.pdf`}
                             className="bg-primary/20 text-primary p-3 rounded-full hover:bg-primary/30 transition-colors flex items-center justify-center"
                             title="Descargar PDF"
                         >
-                            {({ blob, url, loading, error }) =>
+                            {({ loading }) =>
                                 loading ? '...' : <FileText size={24} />
                             }
                         </PDFDownloadLink>

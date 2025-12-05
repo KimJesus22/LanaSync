@@ -131,8 +131,7 @@ const MOTIVATIONAL_QUOTES = [
     "Un presupuesto te dice a dónde va tu dinero en lugar de preguntarte a dónde fue."
 ];
 
-const MonthlyReport = ({ transactions, currentMonth, income, expenses }) => {
-    const randomQuote = MOTIVATIONAL_QUOTES[Math.floor(Math.random() * MOTIVATIONAL_QUOTES.length)];
+const MonthlyReport = ({ transactions, currentMonth, income, expenses, quote }) => {
     const monthName = format(currentMonth, 'MMMM yyyy', { locale: es });
     const balance = income - expenses;
 
@@ -196,7 +195,7 @@ const MonthlyReport = ({ transactions, currentMonth, income, expenses }) => {
 
                 {/* Footer */}
                 <View style={styles.footer}>
-                    <Text style={styles.quote}>"{randomQuote}"</Text>
+                    <Text style={styles.quote}>"{quote}"</Text>
                     <Text style={styles.pageNumber} render={({ pageNumber, totalPages }) => (
                         `${pageNumber} / ${totalPages}`
                     )} fixed />

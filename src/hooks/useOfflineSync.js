@@ -3,20 +3,19 @@ import { addTransaction } from '../api';
 
 export const useOfflineSync = () => {
     const [isOnline, setIsOnline] = useState(navigator.onLine);
-    const [pendingTransactions, setPendingTransactions] = useState([]);
     const [syncNotification, setSyncNotification] = useState(null);
-
-    // Load pending transactions from localStorage on mount
-    useEffect(() => {
+    const [pendingTransactions, setPendingTransactions] = useState(() => {
         const saved = localStorage.getItem('pending_transactions');
         if (saved) {
             try {
-                setPendingTransactions(JSON.parse(saved));
+                return JSON.parse(saved);
             } catch (e) {
                 console.error('Error parsing pending transactions', e);
+                return [];
             }
         }
-    }, []);
+        return [];
+    });
 
     // Listen for online/offline status
     useEffect(() => {
@@ -76,7 +75,7 @@ export const useOfflineSync = () => {
 
             sync();
         }
-    }, [isOnline]); // Removed pendingTransactions from dependency to avoid loop if we update it inside. 
+    }, [isOnline, pendingTransactions]);
     // Actually, if we update pendingTransactions, we want to trigger sync? 
     // No, only if we go online.
     // But if we add a transaction while online, it goes directly to API.

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Plus, X, Wallet, CreditCard, Mic } from 'lucide-react';
 import { useFinanzas } from '../context/FinanzasContext';
 import { supabase } from '../supabaseClient';

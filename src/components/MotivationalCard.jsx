@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Quote } from 'lucide-react';
 import { Card, CardContent } from './ui/Card';
 
@@ -11,13 +11,10 @@ const quotes = [
 ];
 
 const MotivationalCard = () => {
-    const [quote, setQuote] = useState('');
-
-    useEffect(() => {
-        // Select a random quote on mount
+    const [quote] = useState(() => {
         const randomIndex = Math.floor(Math.random() * quotes.length);
-        setQuote(quotes[randomIndex]);
-    }, []);
+        return quotes[randomIndex];
+    });
 
     return (
         <Card className="bg-gradient-to-r from-indigo-900 to-purple-900 border-none shadow-lg">

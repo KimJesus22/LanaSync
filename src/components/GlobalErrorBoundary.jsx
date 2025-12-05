@@ -5,7 +5,7 @@ import { AlertTriangle, RefreshCw } from 'lucide-react';
 const GlobalErrorBoundary = ({ children }) => {
     return (
         <Sentry.ErrorBoundary
-            fallback={({ error, resetError }) => (
+            fallback={({ error }) => (
                 <div className="min-h-screen bg-gray-900 flex items-center justify-center p-4">
                     <div className="bg-gray-800 border border-gray-700 rounded-2xl p-8 max-w-md w-full text-center shadow-2xl">
                         <div className="bg-red-500/20 p-4 rounded-full w-20 h-20 mx-auto mb-6 flex items-center justify-center">
