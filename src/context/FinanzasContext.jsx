@@ -10,7 +10,11 @@ import {
     deleteBudget as apiDeleteBudget,
     fetchRecurringExpenses,
     addRecurringExpense as apiAddRecurringExpense,
-    deleteRecurringExpense as apiDeleteRecurringExpense
+    deleteRecurringExpense as apiDeleteRecurringExpense,
+    fetchSavingsGoals,
+    addSavingsGoal as apiAddSavingsGoal,
+    updateSavingsGoalAmount as apiUpdateSavingsGoalAmount,
+    deleteSavingsGoal as apiDeleteSavingsGoal
 } from '../api';
 import { useOfflineSync } from '../hooks/useOfflineSync';
 import { isSameMonth, parseISO, startOfMonth } from 'date-fns';
@@ -31,6 +35,7 @@ export const FinanzasProvider = ({ children }) => {
     const [users, setUsers] = useState([]);
     const [budgets, setBudgets] = useState([]);
     const [recurringExpenses, setRecurringExpenses] = useState([]);
+    const [savingsGoals, setSavingsGoals] = useState([]);
     const [currentUserFilter, setCurrentUserFilter] = useState('all'); // 'all' | userId
     const [currentMonth, setCurrentMonth] = useState(new Date());
     const [loading, setLoading] = useState(true);
@@ -66,11 +71,12 @@ export const FinanzasProvider = ({ children }) => {
             }
 
             setLoading(true);
-            const [transactionsData, membersData, budgetsData, recurringData] = await Promise.all([
+            const [transactionsData, membersData, budgetsData, recurringData, savingsGoalsData] = await Promise.all([
                 fetchTransactions(),
                 fetchMembers(),
                 fetchBudgets(),
-                fetchRecurringExpenses()
+                fetchRecurringExpenses(),
+                fetchSavingsGoals()
             ]);
 
             const formattedData = transactionsData.map(t => ({
@@ -88,6 +94,7 @@ export const FinanzasProvider = ({ children }) => {
             setUsers(membersData);
             setBudgets(budgetsData);
             setRecurringExpenses(recurringData);
+            setSavingsGoals(savingsGoalsData);
             setLoading(false);
         };
 
@@ -164,6 +171,9 @@ export const FinanzasProvider = ({ children }) => {
 
     const saldoEfectivo = getBalance('efectivo');
     const saldoVales = getBalance('vales');
+
+    const totalSavings = savingsGoals.reduce((acc, goal) => acc + parseFloat(goal.current_amount), 0);
+    const saldoDisponibleReal = saldoEfectivo - totalSavings;
 
     const getExpensesByCategory = (categoryName) => {
         return filteredTransactions
@@ -260,6 +270,47 @@ export const FinanzasProvider = ({ children }) => {
         }
     };
 
+    // Savings Goals Functions
+    const addSavingsGoal = async (name, targetAmount) => {
+        if (!session?.user) return;
+        try {
+            const newGoal = await apiAddSavingsGoal({
+                name,
+                target_amount: targetAmount,
+                current_amount: 0,
+                user_id: session.user.id
+            });
+            setSavingsGoals(prev => [...prev, newGoal]);
+        } catch (error) {
+            console.error("Error adding savings goal:", error);
+            alert("Error al crear la meta.");
+        }
+    };
+
+    const deleteSavingsGoal = async (id) => {
+        try {
+            await apiDeleteSavingsGoal(id);
+            setSavingsGoals(prev => prev.filter(g => g.id !== id));
+        } catch (error) {
+            console.error("Error deleting savings goal:", error);
+        }
+    };
+
+    const transferToGoal = async (goalId, amount) => {
+        const goal = savingsGoals.find(g => g.id === goalId);
+        if (!goal) return;
+
+        const newAmount = parseFloat(goal.current_amount) + parseFloat(amount);
+
+        try {
+            const updatedGoal = await apiUpdateSavingsGoalAmount(goalId, newAmount);
+            setSavingsGoals(prev => prev.map(g => g.id === goalId ? updatedGoal : g));
+        } catch (error) {
+            console.error("Error transferring to goal:", error);
+            alert("Error al transferir fondos.");
+        }
+    };
+
     const value = {
         users,
         transactions: filteredTransactions,
@@ -268,6 +319,7 @@ export const FinanzasProvider = ({ children }) => {
         currentMonth,
         setCurrentMonth,
         saldoEfectivo,
+        saldoDisponibleReal,
         saldoVales,
         addTransaction,
         deleteTransaction,
@@ -279,8 +331,11 @@ export const FinanzasProvider = ({ children }) => {
         deleteBudget,
         recurringExpenses,
         addRecurringExpense,
-        addRecurringExpense,
         deleteRecurringExpense,
+        savingsGoals,
+        addSavingsGoal,
+        deleteSavingsGoal,
+        transferToGoal,
         isOnline,
         pendingTransactions,
         syncNotification

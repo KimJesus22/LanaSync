@@ -155,3 +155,56 @@ export const deleteBudget = async (id) => {
         throw error;
     }
 };
+
+// Savings Goals API
+export const fetchSavingsGoals = async () => {
+    const { data, error } = await supabase
+        .from('savings_goals')
+        .select('*')
+        .order('created_at', { ascending: true });
+
+    if (error) {
+        console.error('Error fetching savings goals:', error);
+        return [];
+    }
+    return data;
+};
+
+export const addSavingsGoal = async (goal) => {
+    const { data, error } = await supabase
+        .from('savings_goals')
+        .insert([goal])
+        .select();
+
+    if (error) {
+        console.error('Error adding savings goal:', error);
+        throw error;
+    }
+    return data[0];
+};
+
+export const updateSavingsGoalAmount = async (id, newAmount) => {
+    const { data, error } = await supabase
+        .from('savings_goals')
+        .update({ current_amount: newAmount })
+        .eq('id', id)
+        .select();
+
+    if (error) {
+        console.error('Error updating savings goal:', error);
+        throw error;
+    }
+    return data[0];
+};
+
+export const deleteSavingsGoal = async (id) => {
+    const { error } = await supabase
+        .from('savings_goals')
+        .delete()
+        .eq('id', id);
+
+    if (error) {
+        console.error('Error deleting savings goal:', error);
+        throw error;
+    }
+};

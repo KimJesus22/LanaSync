@@ -9,6 +9,8 @@ import ExpenseChart from '../components/ExpenseChart';
 import AddTransactionModal from '../components/AddTransactionModal';
 import MotivationalCard from '../components/MotivationalCard';
 import BudgetSection from '../components/BudgetSection';
+import FinancialProjection from '../components/FinancialProjection';
+import SavingsGoalsSection from '../components/SavingsGoalsSection';
 
 const Dashboard = () => {
     const {
@@ -146,6 +148,10 @@ const Dashboard = () => {
             </header>
 
             <MotivationalCard />
+
+            <FinancialProjection />
+
+            <SavingsGoalsSection />
 
             <MonthSelector />
 

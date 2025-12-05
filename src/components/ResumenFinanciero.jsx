@@ -3,7 +3,7 @@ import { Wallet, CreditCard, CheckCircle2, AlertCircle } from 'lucide-react';
 import { useFinanzas } from '../context/FinanzasContext';
 
 const ResumenFinanciero = () => {
-    const { saldoEfectivo, saldoVales, getExpensesByCategory } = useFinanzas();
+    const { saldoEfectivo, saldoDisponibleReal, saldoVales, getExpensesByCategory } = useFinanzas();
 
     // Vales: $600 iniciales.
     const valesIniciales = 600;
@@ -37,12 +37,17 @@ const ResumenFinanciero = () => {
                     <Wallet className="h-4 w-4 text-primary" />
                 </CardHeader>
                 <CardContent>
-                    <div className={`text-3xl font-bold ${saldoEfectivo < 0 ? 'text-red-500' : 'text-white'}`}>
-                        {formatCurrency(saldoEfectivo)}
+                    <div className={`text-3xl font-bold ${saldoDisponibleReal < 0 ? 'text-red-500' : 'text-white'}`}>
+                        {formatCurrency(saldoDisponibleReal)}
                     </div>
-                    <p className="text-xs text-muted mt-1">
-                        Disponible
-                    </p>
+                    <div className="flex justify-between items-center mt-1">
+                        <p className="text-xs text-muted">
+                            Disponible Real
+                        </p>
+                        <p className="text-[10px] text-gray-500">
+                            Total: {formatCurrency(saldoEfectivo)}
+                        </p>
+                    </div>
                 </CardContent>
             </Card>
 
